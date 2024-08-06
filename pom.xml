@@ -10,7 +10,7 @@
     </parent>
     <groupId>novi.backEnd</groupId>
     <artifactId>Eindopdracht-MoesProduce-BackEnd</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0</version>
     <name>Eindopdracht-MoesProduce-BackEnd</name>
     <description>Eindopdracht-MoesProduce-BackEnd</description>
     <url/>
