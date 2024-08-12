@@ -1,12 +1,12 @@
-package novi.backend.eindopdrachtmoesproducebackend.models;
+package novi.backend.eindopdrachtmoesproducebackend.dtos;
 
 import java.time.LocalDate;
 
-public class UserProfile {
+public class UserProfileDto {
 
     private String firstName;
     private String lastName;
-    private LocalDate DoB;
+    private LocalDate doB;
     private String address;
 
     public String getAddress() {
@@ -18,11 +18,11 @@ public class UserProfile {
     }
 
     public LocalDate getDoB() {
-        return DoB;
+        return doB;
     }
 
     public void setDoB(LocalDate doB) {
-        DoB = doB;
+        this.doB = doB;
     }
 
     public String getFirstName() {
@@ -40,5 +40,4 @@ public class UserProfile {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
-
 }
