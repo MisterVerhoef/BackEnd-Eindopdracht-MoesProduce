@@ -1,9 +1,5 @@
 package novi.backend.eindopdrachtmoesproducebackend.models;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
@@ -19,7 +15,9 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserProfile userProfile;
+
 
     public String getEmail() {
         return email;

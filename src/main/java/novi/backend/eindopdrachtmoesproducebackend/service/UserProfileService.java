@@ -25,39 +25,38 @@ public class UserProfileService {
                 .orElseThrow(() -> new RecordNotFoundException("User not found"));
 
         UserProfile userProfile = new UserProfile();
+        userProfile.setUser(user);
         updateUserProfileFromDto(userProfile, userProfileDto);
         user.setUserProfile(userProfile);
+        userProfileRepository.save(userProfile);
 
         userRepository.save(user);
         userProfileRepository.save(userProfile);
     }
 
     public UserProfileDto getUserProfile(String userEmail) {
-        User user = userRepository.findById(userEmail)
-                .orElseThrow(() -> new RecordNotFoundException("User not found"));
-
-        UserProfile userProfile = user.getUserProfile();
-        if (userProfile == null) {
-            throw new RecordNotFoundException("User profile not found");
-        }
-
-        return fromUserProfile(userProfile);
+        UserProfile userProfile = userProfileRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new RecordNotFoundException("User profile not found"));
+        return convertToDto(userProfile);
     }
 
     public void updateUserProfile(String userEmail, UserProfileDto userProfileDto) {
-        User user = userRepository.findById(userEmail)
-                .orElseThrow(() -> new RecordNotFoundException("User not found"));
+        UserProfile userProfile = userProfileRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new RecordNotFoundException("User profile not found"));
 
-        UserProfile userProfile = user.getUserProfile();
-        if (userProfile == null) {
-            throw new RecordNotFoundException("User profile not found");
-        }
-
-        updateUserProfileFromDto(userProfile, userProfileDto);
         userProfileRepository.save(userProfile);
     }
 
     private UserProfileDto fromUserProfile(UserProfile userProfile) {
+        UserProfileDto dto = new UserProfileDto();
+        dto.setFirstName(userProfile.getFirstName());
+        dto.setLastName(userProfile.getLastName());
+        dto.setDoB(userProfile.getDoB());
+        dto.setAddress(userProfile.getAddress());
+        return dto;
+    }
+
+    private UserProfileDto convertToDto(UserProfile userProfile) {
         UserProfileDto dto = new UserProfileDto();
         dto.setFirstName(userProfile.getFirstName());
         dto.setLastName(userProfile.getLastName());

@@ -1,8 +1,19 @@
 package novi.backend.eindopdrachtmoesproducebackend.models;
 
-import java.time.LocalDate;
+import jakarta.persistence.*;
 
+import java.time.LocalDate;
+@Entity
+@Table(name = "user_profiles")
 public class UserProfile {
+
+    @Id
+    private String email;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "email")
+    private User user;
 
     private String firstName;
     private String lastName;
@@ -39,6 +50,14 @@ public class UserProfile {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
 }

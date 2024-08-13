@@ -25,6 +25,9 @@ public class UserController {
 
     @PostMapping("")
     public ResponseEntity<String> createUser(@RequestBody UserDto userDto) {
+        if (userDto.getUsername() == null || userDto.getUsername().isEmpty()) {
+            return ResponseEntity.badRequest().body("Username cannot be null or empty");
+        }
         String createdUserEmail = userService.createUser(userDto);
         return ResponseEntity.ok().body(createdUserEmail);
     }

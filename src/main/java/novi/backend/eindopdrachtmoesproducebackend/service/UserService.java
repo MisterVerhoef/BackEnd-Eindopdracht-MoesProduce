@@ -1,13 +1,16 @@
 package novi.backend.eindopdrachtmoesproducebackend.service;
 
 
+import jakarta.transaction.Transactional;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.UserDto;
 import novi.backend.eindopdrachtmoesproducebackend.exceptions.RecordNotFoundException;
 import novi.backend.eindopdrachtmoesproducebackend.models.User;
+import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
+import novi.backend.eindopdrachtmoesproducebackend.repositories.UserProfileRepository;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+//import org.springframework.security.core.userdetails.UsernameNotFoundException;
+//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,9 +22,11 @@ public class UserService {
 
 
     private final UserRepository userRepository;
+    private final UserProfileRepository userProfileRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, UserProfileRepository userProfileRepository) {
         this.userRepository = userRepository;
+        this.userProfileRepository = userProfileRepository;
     }
 
     public List<UserDto> getUsers() {
@@ -39,11 +44,20 @@ public class UserService {
         return fromUser(user);
     }
 
-    public String createUser(UserDto userDto) {
-        User user = toUser(userDto);
-        User savedUser = userRepository.save(user);
-        return savedUser.getEmail();
+    @Transactional
+public String createUser(UserDto userDto) {
+    if (userRepository.existsById(userDto.getEmail())) {
+        throw new IllegalArgumentException("User with email " + userDto.getEmail() + " already exists");
     }
+
+    User user = toUser(userDto);
+    UserProfile userProfile = new UserProfile();
+    userProfile.setUser(user);
+    user.setUserProfile(userProfile);
+
+    userRepository.save(user);
+    return user.getEmail();
+}
 
     public void deleteUser(String email) {
         userRepository.deleteById(email);
@@ -52,10 +66,11 @@ public class UserService {
     public void updateUser(String email, UserDto newUser) {
         if (!userRepository.existsById(email)) throw new RecordNotFoundException();
         User user = userRepository.findById(email).get();
-        updateUserFromDto(user, newUser);
+        user.setPassword(newUser.getPassword());
         userRepository.save(user);
     }
-public static UserDto fromUser(User user) {
+
+    public static UserDto fromUser(User user) {
     UserDto dto = new UserDto();
     dto.setEmail(user.getEmail());
     dto.setUsername(user.getUsername());
