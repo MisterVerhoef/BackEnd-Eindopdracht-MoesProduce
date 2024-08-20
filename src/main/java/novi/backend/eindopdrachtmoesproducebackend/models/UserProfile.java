@@ -1,55 +1,41 @@
 package novi.backend.eindopdrachtmoesproducebackend.models;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
+
 @Entity
 @Table(name = "user_profiles")
 public class UserProfile {
 
     @Id
-    private String email;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "email")
-    private User user;
+    private String name;
 
-    private String firstName;
-    private String lastName;
-    private LocalDate DoB;
+    private LocalDate doB;
+
     private String address;
 
-    public String getAddress() {
-        return address;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    public UserProfile() {
     }
 
-    public void setAddress(String address) {
+    public UserProfile(String address, LocalDate doB, String name) {
         this.address = address;
+        this.doB = doB;
+        this.name = name;
     }
 
-    public LocalDate getDoB() {
-        return DoB;
-    }
 
-    public void setDoB(LocalDate doB) {
-        DoB = doB;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public UserProfile(String name, LocalDate doB, User user, String address) {
+        this.name = name;
+        this.doB = doB;
+        this.user = user;
+        this.address = address;
     }
 
     public User getUser() {
@@ -60,4 +46,35 @@ public class UserProfile {
         this.user = user;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public LocalDate getDoB() {
+        return doB;
+    }
+
+    public void setDoB(LocalDate doB) {
+        this.doB = doB;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 }

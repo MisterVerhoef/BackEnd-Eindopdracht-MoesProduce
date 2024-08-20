@@ -1,75 +1,73 @@
 package novi.backend.eindopdrachtmoesproducebackend.service;
 
+import jakarta.transaction.Transactional;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.UserProfileDto;
 import novi.backend.eindopdrachtmoesproducebackend.exceptions.RecordNotFoundException;
 import novi.backend.eindopdrachtmoesproducebackend.models.User;
 import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserProfileRepository;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 
 @Service
 public class UserProfileService {
 
-    private final UserProfileRepository userProfileRepository;
 
     private final UserRepository userRepository;
+    private final UserProfileRepository userProfileRepository;
 
-    public UserProfileService(UserProfileRepository userProfileRepository, UserRepository userRepository) {
-        this.userProfileRepository = userProfileRepository;
+    @Autowired
+    public UserProfileService(UserRepository userRepository, UserProfileRepository userProfileRepository) {
         this.userRepository = userRepository;
+        this.userProfileRepository = userProfileRepository;
     }
 
-    public void createUserProfile(String userEmail, UserProfileDto userProfileDto) {
-        User user = userRepository.findById(userEmail)
-                .orElseThrow(() -> new RecordNotFoundException("User not found"));
+    @Transactional
+    public UserProfile createUserProfile(Long userId, String name, LocalDate doB, String address) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        UserProfile userProfile = new UserProfile();
+        if (user.getUserProfile() != null) {
+            throw new RuntimeException("User profile already exists");
+        }
+
+        UserProfile userProfile = new UserProfile(name, doB, address);
         userProfile.setUser(user);
-        updateUserProfileFromDto(userProfile, userProfileDto);
         user.setUserProfile(userProfile);
-        userProfileRepository.save(userProfile);
 
+        return userProfileRepository.save(userProfile);
+    }
+
+    @Transactional
+    public UserProfile updateUserProfile(Long userId, String name, LocalDate doB, String address) {
+        UserProfile userProfile = userProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User profile not found"));
+
+        userProfile.setName(name);
+        userProfile.setDoB(doB);
+        userProfile.setAddress(address);
+
+        return userProfileRepository.save(userProfile);
+    }
+
+    public UserProfile getUserProfile(Long userId) {
+        return userProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User profile not found"));
+    }
+
+    @Transactional
+    public void deleteUserProfile(Long userId) {
+        UserProfile userProfile = userProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User profile not found"));
+
+        User user = userProfile.getUser();
+        user.setUserProfile(null);
         userRepository.save(user);
-        userProfileRepository.save(userProfile);
-    }
 
-    public UserProfileDto getUserProfile(String userEmail) {
-        UserProfile userProfile = userProfileRepository.findByUserEmail(userEmail)
-                .orElseThrow(() -> new RecordNotFoundException("User profile not found"));
-        return convertToDto(userProfile);
-    }
-
-    public void updateUserProfile(String userEmail, UserProfileDto userProfileDto) {
-        UserProfile userProfile = userProfileRepository.findByUserEmail(userEmail)
-                .orElseThrow(() -> new RecordNotFoundException("User profile not found"));
-
-        userProfileRepository.save(userProfile);
-    }
-
-    private UserProfileDto fromUserProfile(UserProfile userProfile) {
-        UserProfileDto dto = new UserProfileDto();
-        dto.setFirstName(userProfile.getFirstName());
-        dto.setLastName(userProfile.getLastName());
-        dto.setDoB(userProfile.getDoB());
-        dto.setAddress(userProfile.getAddress());
-        return dto;
-    }
-
-    private UserProfileDto convertToDto(UserProfile userProfile) {
-        UserProfileDto dto = new UserProfileDto();
-        dto.setFirstName(userProfile.getFirstName());
-        dto.setLastName(userProfile.getLastName());
-        dto.setDoB(userProfile.getDoB());
-        dto.setAddress(userProfile.getAddress());
-        return dto;
-    }
-
-    private void updateUserProfileFromDto(UserProfile userProfile, UserProfileDto userProfileDto) {
-        userProfile.setFirstName(userProfileDto.getFirstName());
-        userProfile.setLastName(userProfileDto.getLastName());
-        userProfile.setDoB(userProfileDto.getDoB());
-        userProfile.setAddress(userProfileDto.getAddress());
+        userProfileRepository.delete(userProfile);
     }
 }
 

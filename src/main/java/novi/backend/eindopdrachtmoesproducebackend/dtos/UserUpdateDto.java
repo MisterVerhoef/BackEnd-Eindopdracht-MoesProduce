@@ -4,7 +4,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public class UserDto {
+public class UserUpdateDto {
+
 
     @NotBlank(message = "Een emailadres is vereist")
     @Email(message = "Ongeldig emailadres")
@@ -14,10 +15,9 @@ public class UserDto {
     @NotBlank(message = "Een gebruikersnaam is vereist")
     private String username;
 
+    public UserUpdateDto() {}
 
-    public UserDto() {}
-
-    public UserDto(String email, String username) {
+    public UserUpdateDto(String email, String username) {
         this.email = email;
         this.username = username;
     }
@@ -37,4 +37,5 @@ public class UserDto {
     public void setUsername(String username) {
         this.username = username;
     }
+
 }

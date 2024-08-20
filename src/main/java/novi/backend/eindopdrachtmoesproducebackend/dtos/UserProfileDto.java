@@ -4,10 +4,17 @@ import java.time.LocalDate;
 
 public class UserProfileDto {
 
-    private String firstName;
-    private String lastName;
+    private String name;
     private LocalDate doB;
     private String address;
+
+    public UserProfileDto() {}
+
+    public UserProfileDto(String name, LocalDate doB, String address) {
+        this.name = name;
+        this.doB = doB;
+        this.address = address;
+    }
 
     public String getAddress() {
         return address;
@@ -25,19 +32,11 @@ public class UserProfileDto {
         this.doB = doB;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getName() {
+        return name;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setName(String name) {
+        name = name;
     }
 }
