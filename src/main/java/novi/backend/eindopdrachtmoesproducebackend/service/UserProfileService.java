@@ -8,66 +8,63 @@ import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserProfileRepository;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.util.Optional;
+
 
 @Service
 public class UserProfileService {
 
 
     private final UserRepository userRepository;
-    private final UserProfileRepository userProfileRepository;
 
     @Autowired
-    public UserProfileService(UserRepository userRepository, UserProfileRepository userProfileRepository) {
+    public UserProfileService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.userProfileRepository = userProfileRepository;
     }
 
-    @Transactional
-    public UserProfile createUserProfile(Long userId, String name, LocalDate doB, String address) {
-        User user = userRepository.findById(userId)
+    public UserProfileDto getUserProfile(String username) {
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (user.getUserProfile() != null) {
-            throw new RuntimeException("User profile already exists");
+        UserProfile profile = user.getUserProfile();
+        if (profile == null) {
+            throw new RuntimeException("Profile not found");
         }
 
-        UserProfile userProfile = new UserProfile(name, doB, address);
-        userProfile.setUser(user);
-        user.setUserProfile(userProfile);
-
-        return userProfileRepository.save(userProfile);
+        return convertToDto(profile, user);
     }
 
     @Transactional
-    public UserProfile updateUserProfile(Long userId, String name, LocalDate doB, String address) {
-        UserProfile userProfile = userProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("User profile not found"));
+    public UserProfileDto updateUserProfile(String username, UserProfileDto userProfileDto) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        userProfile.setName(name);
-        userProfile.setDoB(doB);
-        userProfile.setAddress(address);
+        UserProfile profile = user.getUserProfile();
+        if (profile == null) {
+            profile = new UserProfile();
+            user.setUserProfile(profile);
+        }
 
-        return userProfileRepository.save(userProfile);
-    }
+        profile.setName(userProfileDto.getName());
+        profile.setDoB(userProfileDto.getDoB());
+        profile.setAddress(userProfileDto.getAddress());
 
-    public UserProfile getUserProfile(Long userId) {
-        return userProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("User profile not found"));
-    }
-
-    @Transactional
-    public void deleteUserProfile(Long userId) {
-        UserProfile userProfile = userProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("User profile not found"));
-
-        User user = userProfile.getUser();
-        user.setUserProfile(null);
         userRepository.save(user);
+        return convertToDto(profile, user);
+    }
 
-        userProfileRepository.delete(userProfile);
+    private UserProfileDto convertToDto(UserProfile profile, User user) {
+        return new UserProfileDto(
+                profile.getName(),
+                profile.getDoB(),
+                profile.getAddress(),
+                user.getUsername(),
+                user.getEmail()
+        );
     }
 }
+
 

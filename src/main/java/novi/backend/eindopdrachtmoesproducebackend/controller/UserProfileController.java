@@ -2,16 +2,20 @@ package novi.backend.eindopdrachtmoesproducebackend.controller;
 
 import jakarta.validation.Valid;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.UserProfileDto;
-import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
 import novi.backend.eindopdrachtmoesproducebackend.service.UserProfileService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/user-profiles")
+@RequestMapping("/api/users/profile")
 public class UserProfileController {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserProfileController.class);
     private final UserProfileService userProfileService;
 
     @Autowired
@@ -19,30 +23,39 @@ public class UserProfileController {
         this.userProfileService = userProfileService;
     }
 
-    @PostMapping
-    public ResponseEntity<UserProfileDto> createUserProfile(@RequestParam Long userId, @Valid @RequestBody UserProfileDto userProfileDto) {
-        UserProfile createdProfile = userProfileService.createUserProfile(userId, userProfileDto.getName(), userProfileDto.getDoB(), userProfileDto.getAddress());
-        UserProfileDto responseDto = new UserProfileDto(createdProfile.getName(), createdProfile.getDoB(), createdProfile.getAddress());
-        return ResponseEntity.ok(responseDto);
+    @GetMapping
+    public ResponseEntity<?> getUserProfile(Authentication authentication) {
+        if (authentication == null) {
+            logger.error("Authentication object is null");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            UserProfileDto profileDto = userProfileService.getUserProfile(authentication.getName());
+            logger.info("Successfully retrieved profile for user: {}", authentication.getName());
+            return ResponseEntity.ok(profileDto);
+        } catch (Exception e) {
+            logger.error("Error retrieving profile for user: {}", authentication.getName(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserProfileDto> getUserProfile(@PathVariable Long userId) {
-        UserProfile userProfile = userProfileService.getUserProfile(userId);
-        UserProfileDto profileDto = new UserProfileDto(userProfile.getName(), userProfile.getDoB(), userProfile.getAddress());
-        return ResponseEntity.ok(profileDto);
-    }
+    @PutMapping
+    public ResponseEntity<?> updateUserProfile(@Valid @RequestBody UserProfileDto userProfileDto, Authentication authentication) {
+        if (authentication == null) {
+            logger.error("Authentication object is null");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
-    @PutMapping("/{userId}")
-    public ResponseEntity<UserProfileDto> updateUserProfile(@PathVariable Long userId, @Valid @RequestBody UserProfileDto userProfileDto) {
-        UserProfile updatedProfile = userProfileService.updateUserProfile(userId, userProfileDto.getName(), userProfileDto.getDoB(), userProfileDto.getAddress());
-        UserProfileDto responseDto = new UserProfileDto(updatedProfile.getName(), updatedProfile.getDoB(), updatedProfile.getAddress());
-        return ResponseEntity.ok(responseDto);
-    }
-
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUserProfile(@PathVariable Long userId) {
-        userProfileService.deleteUserProfile(userId);
-        return ResponseEntity.noContent().build();
+        try {
+            UserProfileDto updatedProfileDto = userProfileService.updateUserProfile(authentication.getName(), userProfileDto);
+            logger.info("User profile updated successfully for user: {}", authentication.getName());
+            System.out.println("User profile updated successfully for user: " + authentication.getName());
+            return ResponseEntity.ok(updatedProfileDto);
+        } catch (Exception e) {
+            logger.error("Error updating profile for user: {}", authentication.getName(), e);
+            System.out.println("Error updating profile for user: " + authentication.getName());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

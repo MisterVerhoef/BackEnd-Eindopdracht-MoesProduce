@@ -24,10 +24,10 @@ public class UserProfile {
     public UserProfile() {
     }
 
-    public UserProfile(String address, LocalDate doB, String name) {
-        this.address = address;
-        this.doB = doB;
+    public UserProfile(String name, LocalDate doB, String address) {
         this.name = name;
+        this.doB = doB;
+        this.address = address;
     }
 
 

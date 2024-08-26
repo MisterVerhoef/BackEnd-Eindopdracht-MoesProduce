@@ -3,6 +3,7 @@ package novi.backend.eindopdrachtmoesproducebackend.service;
 
 import jakarta.transaction.Transactional;
 import novi.backend.eindopdrachtmoesproducebackend.models.User;
+import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -28,15 +29,23 @@ public class UserService {
     @Transactional
     public User registerUser(String email, String username, String password) {
         if (userRepository.existsByEmail(email)) {
-            throw new RuntimeException("Email already in use");
+            throw new RuntimeException("Email is already in use");
         }
         if (userRepository.existsByUsername(username)) {
-            throw new RuntimeException("Username already in use");
+            throw new RuntimeException("Username is already taken");
         }
 
-        User user = new User(email, username, passwordEncoder.encode(password), User.Role.USER);
+        User user = new User(email, passwordEncoder.encode(password), username);
+        user.addRole(User.Role.USER);
+
+        UserProfile userProfile = new UserProfile();
+        userProfile.setName(username);
+        userProfile.setUser(user);
+        user.setUserProfile(userProfile);
+
         return userRepository.save(user);
     }
+
 
     public String loginUser(String usernameOrEmail, String password) {
         if (usernameOrEmail == null || password == null) {
