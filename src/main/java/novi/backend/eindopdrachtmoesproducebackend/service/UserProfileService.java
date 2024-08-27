@@ -25,8 +25,8 @@ public class UserProfileService {
         this.userRepository = userRepository;
     }
 
-    public UserProfileDto getUserProfile(String username) {
-        User user = userRepository.findByUsername(username)
+    public UserProfileDto getUserProfile(String usernameOrEmail) {
+        User user = userRepository.findByUsernameOrEmail(usernameOrEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         UserProfile profile = user.getUserProfile();
