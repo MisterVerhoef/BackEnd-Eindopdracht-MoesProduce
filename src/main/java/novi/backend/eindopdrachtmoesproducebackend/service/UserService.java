@@ -1,4 +1,109 @@
 package novi.backend.eindopdrachtmoesproducebackend.service;
 
+
+import jakarta.transaction.Transactional;
+import novi.backend.eindopdrachtmoesproducebackend.models.User;
+import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
+import novi.backend.eindopdrachtmoesproducebackend.repositories.UserRepository;
+import novi.backend.eindopdrachtmoesproducebackend.securtiy.CustomUserDetails;
+import novi.backend.eindopdrachtmoesproducebackend.securtiy.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+
+@Service
 public class UserService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+
+    @Autowired
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+    }
+
+    @Transactional
+    public User registerUser(String email, String username, String password, boolean termsAccepted) {
+        if (userRepository.existsByEmail(email)) {
+            throw new RuntimeException("Email is al in gebruik");
+        }
+        if (userRepository.existsByUsername(username)) {
+            throw new RuntimeException("Gebruikersnaam is al in gebruik");
+        }
+        if (!termsAccepted) {
+            throw new RuntimeException("Voorwaarden moeten worden geaccepteerd");
+        }
+
+        User user = new User(email, passwordEncoder.encode(password), username);
+        user.addRole(User.Role.USER);
+        user.setTermsAccepted(termsAccepted);
+
+        UserProfile userProfile = new UserProfile();
+        userProfile.setName(username);
+        userProfile.setUser(user);
+        user.setUserProfile(userProfile);
+
+        return userRepository.save(user);
+    }
+
+
+    public String loginUser(String usernameOrEmail, String password) {
+        if (usernameOrEmail == null || password == null) {
+            throw new BadCredentialsException("Username/email and password are required");
+        }
+
+        User user = userRepository.findByUsernameOrEmail(usernameOrEmail)
+                .orElseThrow(() -> new BadCredentialsException("Invalid username/email or password"));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new BadCredentialsException("Invalid username/email or password");
+        }
+
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+        return jwtUtil.generateToken(userDetails);
+    }
+
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    @Transactional
+    public User updateUser(Long userId, String email, String username) {
+        User user = getUserById(userId);
+
+        if (!user.getEmail().equals(email) && userRepository.existsByEmail(email)) {
+            throw new RuntimeException("Email already in use");
+        }
+        if (!user.getUsername().equals(username) && userRepository.existsByUsername(username)) {
+            throw new RuntimeException("Username already in use");
+        }
+
+        user.setEmail(email);
+        user.setUsername(username);
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = getUserById(userId);
+        userRepository.delete(user);
+    }
+
+    @Transactional
+    public void promoteToSeller(Long userId) {
+        User user = getUserById(userId);
+        user.addRole(User.Role.SELLER);
+        userRepository.save(user);
+    }
+
 }
+
