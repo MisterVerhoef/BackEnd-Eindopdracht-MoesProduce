@@ -32,20 +32,32 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<UserResponseDto> registerUser(@Valid @RequestBody UserRegistrationDto userRegistrationDto) {
-        User user = userService.registerUser(userRegistrationDto.getEmail(), userRegistrationDto.getUsername(), userRegistrationDto.getPassword());
-        UserResponseDto responseDto = new UserResponseDto(user.getId(), user.getEmail(), user.getUsername(), user.getRoles());
-        
-        logger.info("New user registered: {}, Profile name: {}", user.getUsername(), user.getUserProfile().getName());
-        
+
+        User user = userService.registerUser(
+                userRegistrationDto.getEmail(),
+                userRegistrationDto.getUsername(),
+                userRegistrationDto.getPassword(),
+                userRegistrationDto.getTermsAccepted()
+        );
+
+        UserResponseDto responseDto = new UserResponseDto(
+                user.getId(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getRoles(),
+                user.getTermsAccepted());
+
+        logger.info("New user registered: {}, Profile name: {}, Terms accepted: {}", user.getUsername(), user.getUserProfile().getName(), user.isTermsAccepted());
+
         return ResponseEntity.ok(responseDto);
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> loginUser(@Valid @RequestBody LoginRequestDto loginRequestDto) {
         String token = userService.loginUser(loginRequestDto.getUsernameOrEmail(), loginRequestDto.getPassword());
-        
+
         logger.info("User logged in: {}", loginRequestDto.getUsernameOrEmail());
-        
+
         return ResponseEntity.ok(new LoginResponseDto(token));
     }
 

@@ -5,6 +5,8 @@ import jakarta.transaction.Transactional;
 import novi.backend.eindopdrachtmoesproducebackend.models.User;
 import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserRepository;
+import novi.backend.eindopdrachtmoesproducebackend.securtiy.CustomUserDetails;
+import novi.backend.eindopdrachtmoesproducebackend.securtiy.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,24 +21,30 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @Transactional
-    public User registerUser(String email, String username, String password) {
+    public User registerUser(String email, String username, String password, boolean termsAccepted) {
         if (userRepository.existsByEmail(email)) {
-            throw new RuntimeException("Email is already in use");
+            throw new RuntimeException("Email is al in gebruik");
         }
         if (userRepository.existsByUsername(username)) {
-            throw new RuntimeException("Username is already taken");
+            throw new RuntimeException("Gebruikersnaam is al in gebruik");
+        }
+        if (!termsAccepted) {
+            throw new RuntimeException("Voorwaarden moeten worden geaccepteerd");
         }
 
         User user = new User(email, passwordEncoder.encode(password), username);
         user.addRole(User.Role.USER);
+        user.setTermsAccepted(termsAccepted);
 
         UserProfile userProfile = new UserProfile();
         userProfile.setName(username);
@@ -59,7 +67,8 @@ public class UserService {
             throw new BadCredentialsException("Invalid username/email or password");
         }
 
-        return UUID.randomUUID().toString();
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+        return jwtUtil.generateToken(userDetails);
     }
 
     public User getUserById(Long userId) {

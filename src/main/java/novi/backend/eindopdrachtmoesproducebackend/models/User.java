@@ -29,6 +29,9 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserProfile userProfile;
 
+    @Column(nullable = false)
+    private boolean termsAccepted;
+
     public enum Role {
         ADMIN, USER, SELLER
     }
@@ -105,4 +108,16 @@ public class User {
     public void setUserProfile(UserProfile userProfile) {
         this.userProfile = userProfile;
     }
+
+    public boolean isTermsAccepted() {
+        return termsAccepted;
+    }
+    public boolean getTermsAccepted() {
+        return termsAccepted;
+    }
+
+    public void setTermsAccepted(boolean termsAccepted) {
+        this.termsAccepted = termsAccepted;
+    }
+
 }
