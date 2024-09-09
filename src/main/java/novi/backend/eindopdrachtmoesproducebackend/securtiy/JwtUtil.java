@@ -4,6 +4,7 @@ package novi.backend.eindopdrachtmoesproducebackend.securtiy;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -16,11 +17,18 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")
-    private String secret;
+//    @Value("${jwt.secret}")
+//    private String secret;
+
+    private final JwtSecretKeyGenerator secretKeyGenerator;
 
     @Value("${jwt.expiration}")
     private Long expiration;
+
+    @Autowired
+    public JwtUtil(JwtSecretKeyGenerator secretKeyGenerator) {
+        this.secretKeyGenerator = secretKeyGenerator;
+    }
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
@@ -31,7 +39,8 @@ public class JwtUtil {
         return Jwts.builder().setClaims(claims).setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
-                .signWith(SignatureAlgorithm.HS256, secret).compact();
+                .signWith(SignatureAlgorithm.HS256, secretKeyGenerator.getSecretKey())
+                .compact();
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
@@ -53,10 +62,11 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+        return Jwts.parser().setSigningKey(secretKeyGenerator.getSecretKey()).parseClaimsJws(token).getBody();
     }
 
     private Boolean isTokenExpired(String token) {
+
         return extractExpiration(token).before(new Date());
     }
 }
