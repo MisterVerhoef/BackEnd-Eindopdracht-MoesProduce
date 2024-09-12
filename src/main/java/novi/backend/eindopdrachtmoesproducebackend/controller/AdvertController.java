@@ -1,10 +1,13 @@
 package novi.backend.eindopdrachtmoesproducebackend.controller;
 
+import novi.backend.eindopdrachtmoesproducebackend.dtos.AdvertDto;
 import novi.backend.eindopdrachtmoesproducebackend.models.Advert;
 import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.AdvertRepository;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserProfileRepository;
+import novi.backend.eindopdrachtmoesproducebackend.service.AdvertService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
@@ -15,32 +18,29 @@ import java.util.List;
 public class AdvertController {
 
     @Autowired
-    private AdvertRepository advertRepository;
+    private AdvertService advertService;
 
     @Autowired
     private UserProfileRepository userProfileRepository;
 
     @GetMapping
-    public List<Advert> getAllAdverts() {
-        return advertRepository.findAll();
+    public List<AdvertDto> getAllAdverts() {
+        return advertService.getAllAdverts();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AdvertDto> getAdvertById(@PathVariable Long id) {
+        AdvertDto advertDto = advertService.getAdvertById(id);
+        return ResponseEntity.ok(advertDto);
     }
 
     @PostMapping
-    public Advert createAdvert(@RequestBody Advert advert, Authentication authentication) {
+    public AdvertDto createAdvert(@RequestBody AdvertDto advertDto, Authentication authentication) {
 
-        String username = authentication.getName();
-
-        // Haal het UserProfile op via de username
-        UserProfile userProfile = userProfileRepository.findByUser_Username(username);
-        if (userProfile == null) {
-            throw new RuntimeException("UserProfile not found for the given user.");
-        }
-
-        // Koppel de advert aan het UserProfile
-        advert.setUserProfile(userProfile);
-
-        // Sla de advert op in de database
-        return advertRepository.save(advert);
+        return advertService.createAdvert(advertDto.getTitle(), advertDto.getDescription(), authentication);
     }
+
+
+
 
 }

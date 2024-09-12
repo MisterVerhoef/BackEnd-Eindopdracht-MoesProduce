@@ -89,4 +89,8 @@ public class UserProfile {
     public void setAdverts(List<Advert> adverts) {
         this.adverts = adverts;
     }
+
+    public String getUsername() {
+        return user.getUsername();
+    }
 }
