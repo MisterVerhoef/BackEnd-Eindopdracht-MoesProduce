@@ -2,6 +2,7 @@ package novi.backend.eindopdrachtmoesproducebackend.models;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "user_profiles")
@@ -20,6 +21,9 @@ public class UserProfile {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Advert> adverts;
 
     public UserProfile() {
     }
@@ -76,5 +80,17 @@ public class UserProfile {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public List<Advert> getAdverts() {
+        return adverts;
+    }
+
+    public void setAdverts(List<Advert> adverts) {
+        this.adverts = adverts;
+    }
+
+    public String getUsername() {
+        return user.getUsername();
     }
 }
