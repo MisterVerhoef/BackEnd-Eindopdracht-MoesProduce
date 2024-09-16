@@ -33,7 +33,7 @@ public class User {
     private boolean termsAccepted;
 
     public enum Role {
-        ADMIN, USER, SELLER
+        USER, SELLER, ADMIN
     }
 
     public User() {
@@ -90,33 +90,41 @@ public class User {
     }
 
     public void setRoles(Set<Role> roles) {
+
         this.roles = roles;
     }
 
     public void addRole(Role role) {
+
         this.roles.add(role);
     }
 
     public void removeRole(Role role) {
+
         this.roles.remove(role);
     }
 
     public UserProfile getUserProfile() {
+
         return userProfile;
     }
 
     public void setUserProfile(UserProfile userProfile) {
+
         this.userProfile = userProfile;
     }
 
     public boolean isTermsAccepted() {
+
         return termsAccepted;
     }
     public boolean getTermsAccepted() {
+
         return termsAccepted;
     }
 
     public void setTermsAccepted(boolean termsAccepted) {
+
         this.termsAccepted = termsAccepted;
     }
 
