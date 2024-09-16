@@ -42,22 +42,21 @@ public class SecurityConfig {
 
 
     @Bean
-public SecurityFilterChain filter(HttpSecurity http) throws Exception {
-    http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(
-                            new AntPathRequestMatcher("/api/users/register"),
-                            new AntPathRequestMatcher("/api/users/login")
-                    ).permitAll()
-                    .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    public SecurityFilterChain filter(HttpSecurity http) throws Exception {
+        http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(new AntPathRequestMatcher("/api/users/register"), new AntPathRequestMatcher("/api/users/login")).permitAll() // Openbare routes
+                        .requestMatchers(new AntPathRequestMatcher("/api/admin/**")).hasRole("ADMIN") // Alleen voor admin
+                        .anyRequest().authenticated() // Alle andere routes vereisen authenticatie
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-    return http.build();
-}
+        return http.build();
+    }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

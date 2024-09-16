@@ -2,18 +2,23 @@ package novi.backend.eindopdrachtmoesproducebackend.service;
 
 
 import jakarta.transaction.Transactional;
+import novi.backend.eindopdrachtmoesproducebackend.dtos.UserDto;
+import novi.backend.eindopdrachtmoesproducebackend.dtos.UserResponseDto;
 import novi.backend.eindopdrachtmoesproducebackend.models.User;
 import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserRepository;
 import novi.backend.eindopdrachtmoesproducebackend.securtiy.CustomUserDetails;
 import novi.backend.eindopdrachtmoesproducebackend.securtiy.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -104,6 +109,24 @@ public class UserService {
         user.addRole(User.Role.SELLER);
         userRepository.save(user);
     }
+
+    public List<UserResponseDto> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    private UserResponseDto mapToResponseDto(User user){
+        return new UserResponseDto(
+                user.getId(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getRoles(),
+                user.getTermsAccepted()
+        );
+    }
+
 
 }
 
