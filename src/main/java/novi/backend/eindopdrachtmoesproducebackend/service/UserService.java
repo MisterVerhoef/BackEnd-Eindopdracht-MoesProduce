@@ -104,6 +104,20 @@ public class UserService {
     }
 
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    public void changeUserRole(Long userId, User.Role newRole) {
+        User user = getUserById(userId);
+
+        // Remove all existing roles
+        user.getRoles().clear();
+
+        // Add the new role
+        user.addRole(newRole);
+
+        userRepository.save(user);
+    }
+
+    @Transactional
     public void promoteToSeller(Long userId) {
         User user = getUserById(userId);
         user.addRole(User.Role.SELLER);

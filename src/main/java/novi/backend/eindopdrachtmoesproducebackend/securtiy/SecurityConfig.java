@@ -49,6 +49,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(new AntPathRequestMatcher("/api/users/register"), new AntPathRequestMatcher("/api/users/login")).permitAll() // Openbare routes
                         .requestMatchers(new AntPathRequestMatcher("/api/admin/**")).hasRole("ADMIN") // Alleen voor admin
+                        .requestMatchers(new AntPathRequestMatcher("/api/adverts/**")).authenticated()
                         .anyRequest().authenticated() // Alle andere routes vereisen authenticatie
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
