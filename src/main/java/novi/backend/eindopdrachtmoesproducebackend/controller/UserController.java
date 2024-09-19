@@ -75,11 +75,13 @@ public class UserController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
+        @DeleteMapping("/{userId}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
-        return ResponseEntity.noContent().build();
+        System.out.println("User with userId " + userId + " deleted successfully");
+        return ResponseEntity.ok().body("user deleted successfully");
     }
+
 
     @PutMapping("/{userId}/promote")
     public ResponseEntity<String> promoteToSeller(@PathVariable Long userId) {
