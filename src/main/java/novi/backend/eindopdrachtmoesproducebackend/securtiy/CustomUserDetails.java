@@ -16,7 +16,6 @@ public class CustomUserDetails implements UserDetails {
     private final User user;
 
     public CustomUserDetails(User user) {
-
         this.user = user;
     }
 
@@ -32,7 +31,7 @@ public class CustomUserDetails implements UserDetails {
             System.out.println("Logged in: " + user.getUsername() + " with role: " + role.name());
         });
         return roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))  // Changed: Added "ROLE_" prefix
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
                 .collect(Collectors.toList());
     }
 

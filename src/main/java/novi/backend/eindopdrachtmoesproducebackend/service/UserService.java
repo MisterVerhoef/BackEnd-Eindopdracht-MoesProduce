@@ -99,8 +99,24 @@ public class UserService {
 
     @Transactional
     public void deleteUser(Long userId) {
-        User user = getUserById(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
         userRepository.delete(user);
+        System.out.println("User deleted successfully: " + user.getUsername());
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    public void changeUserRole(Long userId, User.Role newRole) {
+        User user = getUserById(userId);
+
+        // Remove all existing roles
+        user.getRoles().clear();
+
+        // Add the new role
+        user.addRole(newRole);
+
+        userRepository.save(user);
     }
 
     @Transactional

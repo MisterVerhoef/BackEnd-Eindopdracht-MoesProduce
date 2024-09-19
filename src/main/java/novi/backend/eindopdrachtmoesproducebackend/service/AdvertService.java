@@ -3,12 +3,15 @@ package novi.backend.eindopdrachtmoesproducebackend.service;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.AdvertDto;
 import novi.backend.eindopdrachtmoesproducebackend.exceptions.AdvertNotFoundException;
 import novi.backend.eindopdrachtmoesproducebackend.models.Advert;
+import novi.backend.eindopdrachtmoesproducebackend.models.User;
 import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.AdvertRepository;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserProfileRepository;
+import novi.backend.eindopdrachtmoesproducebackend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +26,10 @@ public class AdvertService {
     @Autowired
     private UserProfileRepository userProfileRepository;
 
+    @Autowired
+    private UserRepository userRepository;
 
+    @Transactional
     public AdvertDto createAdvert(String title, String description, Authentication authentication) {
         String username = authentication.getName();
         UserProfile userProfile = userProfileRepository.findByUser_Username(username);
@@ -35,7 +41,14 @@ public class AdvertService {
         Advert advert = new Advert(title, description, userProfile);
         Advert savedAdvert = advertRepository.save(advert);
 
+        User user = userProfile.getUser();
+        if (!user.getRoles().contains(User.Role.SELLER)) {
+            user.addRole(User.Role.SELLER);
+            userRepository.save(user);
+        }
+
         return mapToDto(savedAdvert);
+
     }
 
     public List<AdvertDto> getAllAdverts() {
