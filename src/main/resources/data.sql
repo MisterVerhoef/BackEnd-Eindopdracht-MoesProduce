@@ -53,3 +53,77 @@ VALUES ('User 1', (SELECT id FROM users WHERE username = 'user1')),
        ('User 4', (SELECT id FROM users WHERE username = 'user4')),
        ('User 5', (SELECT id FROM users WHERE username = 'user5')),
        ('User 6', (SELECT id FROM users WHERE username = 'user6'));
+
+-- Bladgroenten
+INSERT INTO vegetables (name, category) VALUES ('Andijvie', 'Bladgroenten');
+INSERT INTO vegetables (name, category) VALUES ('Boerenkool', 'Bladgroenten');
+INSERT INTO vegetables (name, category) VALUES ('Spinazie', 'Bladgroenten');
+INSERT INTO vegetables (name, category) VALUES ('Sla (ijsbergsla, kropsla, bindsla)', 'Bladgroenten');
+INSERT INTO vegetables (name, category) VALUES ('Snijbiet', 'Bladgroenten');
+INSERT INTO vegetables (name, category) VALUES ('Rucola', 'Bladgroenten');
+INSERT INTO vegetables (name, category) VALUES ('Raapstelen', 'Bladgroenten');
+INSERT INTO vegetables (name, category) VALUES ('Krulandijvie', 'Bladgroenten');
+INSERT INTO vegetables (name, category) VALUES ('Veldsla', 'Bladgroenten');
+INSERT INTO vegetables (name, category) VALUES ('Postelein', 'Bladgroenten');
+
+-- Koolsoorten
+INSERT INTO vegetables (name, category) VALUES ('Bloemkool', 'Koolsoorten');
+INSERT INTO vegetables (name, category) VALUES ('Broccoli', 'Koolsoorten');
+INSERT INTO vegetables (name, category) VALUES ('Savooiekool', 'Koolsoorten');
+INSERT INTO vegetables (name, category) VALUES ('Spruitjes', 'Koolsoorten');
+INSERT INTO vegetables (name, category) VALUES ('Witte kool', 'Koolsoorten');
+INSERT INTO vegetables (name, category) VALUES ('Rode kool', 'Koolsoorten');
+INSERT INTO vegetables (name, category) VALUES ('Chinese kool', 'Koolsoorten');
+INSERT INTO vegetables (name, category) VALUES ('Palmenkool (cavolo nero)', 'Koolsoorten');
+
+-- Wortel- en knolgewassen
+INSERT INTO vegetables (name, category) VALUES ('Wortel', 'Wortel- en knolgewassen');
+INSERT INTO vegetables (name, category) VALUES ('Rode biet', 'Wortel- en knolgewassen');
+INSERT INTO vegetables (name, category) VALUES ('Pastinaak', 'Wortel- en knolgewassen');
+INSERT INTO vegetables (name, category) VALUES ('Knolselderij', 'Wortel- en knolgewassen');
+INSERT INTO vegetables (name, category) VALUES ('Radijs', 'Wortel- en knolgewassen');
+INSERT INTO vegetables (name, category) VALUES ('Rammenas', 'Wortel- en knolgewassen');
+INSERT INTO vegetables (name, category) VALUES ('Knolraap', 'Wortel- en knolgewassen');
+INSERT INTO vegetables (name, category) VALUES ('Aardpeer', 'Wortel- en knolgewassen');
+INSERT INTO vegetables (name, category) VALUES ('Schorseneren', 'Wortel- en knolgewassen');
+INSERT INTO vegetables (name, category) VALUES ('Zwarte radijs', 'Wortel- en knolgewassen');
+INSERT INTO vegetables (name, category) VALUES ('Koolrabi', 'Wortel- en knolgewassen');
+
+-- Uiengewassen
+INSERT INTO vegetables (name, category) VALUES ('Ui', 'Uiengewassen');
+INSERT INTO vegetables (name, category) VALUES ('Knoflook', 'Uiengewassen');
+INSERT INTO vegetables (name, category) VALUES ('Prei', 'Uiengewassen');
+INSERT INTO vegetables (name, category) VALUES ('Sjalot', 'Uiengewassen');
+
+-- Peulvruchten
+INSERT INTO vegetables (name, category) VALUES ('Doperwten', 'Peulvruchten');
+INSERT INTO vegetables (name, category) VALUES ('Tuinbonen', 'Peulvruchten');
+INSERT INTO vegetables (name, category) VALUES ('Kapucijners', 'Peulvruchten');
+INSERT INTO vegetables (name, category) VALUES ('Sperziebonen', 'Peulvruchten');
+INSERT INTO vegetables (name, category) VALUES ('Sugar snaps', 'Peulvruchten');
+INSERT INTO vegetables (name, category) VALUES ('Peultjes', 'Peulvruchten');
+
+-- Vruchtgroenten
+INSERT INTO vegetables (name, category) VALUES ('Tomaat (kas/serre)', 'Vruchtgroenten');
+INSERT INTO vegetables (name, category) VALUES ('Komkommer (kas/serre)', 'Vruchtgroenten');
+INSERT INTO vegetables (name, category) VALUES ('Paprika (kas/serre)', 'Vruchtgroenten');
+INSERT INTO vegetables (name, category) VALUES ('Courgette', 'Vruchtgroenten');
+INSERT INTO vegetables (name, category) VALUES ('Pompoen', 'Vruchtgroenten');
+
+-- Overige groenten
+INSERT INTO vegetables (name, category) VALUES ('Asperge', 'Overige groenten');
+INSERT INTO vegetables (name, category) VALUES ('Venkel', 'Overige groenten');
+INSERT INTO vegetables (name, category) VALUES ('Zeekraal (specifieke omstandigheden)', 'Overige groenten');
+INSERT INTO vegetables (name, category) VALUES ('Artisjok (kan, maar heeft specifieke zorg nodig)', 'Overige groenten');
+INSERT INTO vegetables (name, category) VALUES ('Maïs', 'Overige groenten');
+INSERT INTO vegetables (name, category) VALUES ('Winterpostelein', 'Overige groenten');
+INSERT INTO vegetables (name, category) VALUES ('Hopscheuten', 'Overige groenten');
+
+-- Aardappelen
+INSERT INTO vegetables (name, category) VALUES ('Aardappel', 'Aardappelen');
+INSERT INTO vegetables (name, category) VALUES ('Zoete aardappel', 'Aardappelen');
+
+-- Exotische gewassen (kas)
+INSERT INTO vegetables (name, category) VALUES ('Aubergine', 'Exotische gewassen (kas)');
+INSERT INTO vegetables (name, category) VALUES ('Okra', 'Exotische gewassen (kas)');
+INSERT INTO vegetables (name, category) VALUES ('Paksoi', 'Exotische gewassen (kas)');
