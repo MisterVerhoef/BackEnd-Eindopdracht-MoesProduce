@@ -5,9 +5,13 @@ import novi.backend.eindopdrachtmoesproducebackend.dtos.*;
 import novi.backend.eindopdrachtmoesproducebackend.models.User;
 import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserProfileRepository;
+import novi.backend.eindopdrachtmoesproducebackend.securtiy.CustomUserDetails;
 import novi.backend.eindopdrachtmoesproducebackend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +65,22 @@ public class UserController {
         return ResponseEntity.ok(new LoginResponseDto(token));
     }
 
+
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordDto changePasswordDto, @AuthenticationPrincipal UserDetails userDetails) {
+
+        try {
+            Long userId = ((CustomUserDetails) userDetails).getId();
+
+            userService.changePassword(userId,
+                    changePasswordDto.getCurrentPassword(),
+                    changePasswordDto.getNewPassword());
+            return ResponseEntity.ok().body("Password changed successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @GetMapping("/{userId}")
     public ResponseEntity<UserResponseDto> getUserDetails(@PathVariable Long userId) {
         User user = userService.getUserById(userId);
@@ -69,9 +89,26 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long userId, @Valid @RequestBody UserUpdateDto userUpdateDto) {
+    public ResponseEntity<UserResponseDto> updateUser(
+            @PathVariable Long userId,
+            @Valid @RequestBody UserUpdateDto userUpdateDto,
+            Authentication authentication) {
+
+        // Check if the authenticated user is updating their own profile
+        if (!authentication.getName().equals(userService.getUserById(userId).getUsername())) {
+            return ResponseEntity.status(403).build(); // Forbidden
+        }
+
         User updatedUser = userService.updateUser(userId, userUpdateDto.getEmail(), userUpdateDto.getUsername());
-        UserResponseDto responseDto = new UserResponseDto(updatedUser.getId(), updatedUser.getEmail(), updatedUser.getUsername(), updatedUser.getRoles());
+
+        UserResponseDto responseDto = new UserResponseDto(
+                updatedUser.getId(),
+                updatedUser.getEmail(),
+                updatedUser.getUsername(),
+                updatedUser.getRoles(),
+                updatedUser.getTermsAccepted()
+        );
+
         return ResponseEntity.ok(responseDto);
     }
 

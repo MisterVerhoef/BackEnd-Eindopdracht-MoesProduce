@@ -19,6 +19,18 @@ public class UserProfileDto {
         this.email = email;
     }
 
+    // toString method for debugging
+    @Override
+    public String toString() {
+        return "UserProfileDto{" +
+                "name='" + name + '\'' +
+                ", doB=" + doB +
+                ", address='" + address + '\'' +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                '}';
+    }
+
     public String getUsername() {
         return username;
     }

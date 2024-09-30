@@ -83,7 +83,8 @@ public class UserService {
 
     @Transactional
     public User updateUser(Long userId, String email, String username) {
-        User user = getUserById(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!user.getEmail().equals(email) && userRepository.existsByEmail(email)) {
             throw new RuntimeException("Email already in use");
@@ -95,6 +96,19 @@ public class UserService {
         user.setEmail(email);
         user.setUsername(username);
         return userRepository.save(user);
+    }
+
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
+        User user = getUserById(userId);
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedPassword);
+
+        userRepository.save(user);
     }
 
     @Transactional
