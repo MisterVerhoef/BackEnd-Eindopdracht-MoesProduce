@@ -41,7 +41,7 @@ public class UserProfileController {
     }
 
     @PutMapping
-    public ResponseEntity<?> updateUserProfile(@Valid @RequestBody UserProfileDto userProfileDto, Authentication authentication) {
+    public ResponseEntity<UserProfileDto> updateUserProfile(@Valid @RequestBody UserProfileDto userProfileDto, Authentication authentication) {
         if (authentication == null) {
             logger.error("Authentication object is null");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

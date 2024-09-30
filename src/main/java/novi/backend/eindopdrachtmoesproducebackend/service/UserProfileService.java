@@ -2,21 +2,14 @@ package novi.backend.eindopdrachtmoesproducebackend.service;
 
 import jakarta.transaction.Transactional;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.UserProfileDto;
-import novi.backend.eindopdrachtmoesproducebackend.exceptions.RecordNotFoundException;
 import novi.backend.eindopdrachtmoesproducebackend.models.User;
 import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
-import novi.backend.eindopdrachtmoesproducebackend.repositories.UserProfileRepository;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
-
 
 @Service
 public class UserProfileService {
-
 
     private final UserRepository userRepository;
 
@@ -25,8 +18,8 @@ public class UserProfileService {
         this.userRepository = userRepository;
     }
 
-    public UserProfileDto getUserProfile(String usernameOrEmail) {
-        User user = userRepository.findByUsernameOrEmail(usernameOrEmail)
+    public UserProfileDto getUserProfile(String username) {
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         UserProfile profile = user.getUserProfile();
@@ -38,21 +31,45 @@ public class UserProfileService {
     }
 
     @Transactional
-    public UserProfileDto updateUserProfile(String username, UserProfileDto userProfileDto) {
-        User user = userRepository.findByUsername(username)
+    public UserProfileDto updateUserProfile(String currentUsername, UserProfileDto userProfileDto) {
+        User user = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // Update username if changed and not null
+        if (userProfileDto.getUsername() != null && !currentUsername.equals(userProfileDto.getUsername())) {
+            if (userRepository.existsByUsername(userProfileDto.getUsername())) {
+                throw new RuntimeException("Username already taken");
+            }
+            user.setUsername(userProfileDto.getUsername());
+        }
+
+        // Update email if changed and not null
+        if (userProfileDto.getEmail() != null && !user.getEmail().equals(userProfileDto.getEmail())) {
+            if (userRepository.existsByEmail(userProfileDto.getEmail())) {
+                throw new RuntimeException("Email already taken");
+            }
+            user.setEmail(userProfileDto.getEmail());
+        }
+
+        // Update other profile information
         UserProfile profile = user.getUserProfile();
         if (profile == null) {
             profile = new UserProfile();
             user.setUserProfile(profile);
         }
 
-        profile.setName(userProfileDto.getName());
-        profile.setDoB(userProfileDto.getDoB());
-        profile.setAddress(userProfileDto.getAddress());
+        // Only update fields if they are not null
+        if (userProfileDto.getName() != null) {
+            profile.setName(userProfileDto.getName());
+        }
+        if (userProfileDto.getDoB() != null) {
+            profile.setDoB(userProfileDto.getDoB());
+        }
+        if (userProfileDto.getAddress() != null) {
+            profile.setAddress(userProfileDto.getAddress());
+        }
 
-        userRepository.save(user);
+        user = userRepository.save(user);
         return convertToDto(profile, user);
     }
 
@@ -66,5 +83,3 @@ public class UserProfileService {
         );
     }
 }
-
-

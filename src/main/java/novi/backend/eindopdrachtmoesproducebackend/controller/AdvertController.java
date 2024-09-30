@@ -14,7 +14,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/adverts")  // API endpoint voor adverts: /api/adverts/
+@RequestMapping("/api/adverts")
 public class AdvertController {
 
     @Autowired
@@ -35,10 +35,9 @@ public class AdvertController {
     }
 
     @PostMapping
-    public AdvertDto createAdvert(@RequestBody AdvertDto advertDto, Authentication authentication) {
-
-        return advertService.createAdvert(advertDto.getTitle(), advertDto.getDescription(), authentication);
-    }
+public AdvertDto createAdvert(@RequestBody AdvertDto advertDto, Authentication authentication) {
+    return advertService.createAdvert(advertDto.getTitle(), advertDto.getDescription(), advertDto.getVegetables(), authentication);
+}
 
 
 

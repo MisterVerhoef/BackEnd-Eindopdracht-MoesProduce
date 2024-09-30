@@ -1,13 +1,16 @@
 package novi.backend.eindopdrachtmoesproducebackend.service;
 
 import novi.backend.eindopdrachtmoesproducebackend.dtos.AdvertDto;
+import novi.backend.eindopdrachtmoesproducebackend.dtos.VegetableDto;
 import novi.backend.eindopdrachtmoesproducebackend.exceptions.AdvertNotFoundException;
 import novi.backend.eindopdrachtmoesproducebackend.models.Advert;
 import novi.backend.eindopdrachtmoesproducebackend.models.User;
 import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
+import novi.backend.eindopdrachtmoesproducebackend.models.Vegetable;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.AdvertRepository;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserProfileRepository;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserRepository;
+import novi.backend.eindopdrachtmoesproducebackend.repositories.VegetableRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -29,8 +32,11 @@ public class AdvertService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private VegetableRepository vegetableRepository;
+
     @Transactional
-    public AdvertDto createAdvert(String title, String description, Authentication authentication) {
+    public AdvertDto createAdvert(String title, String description, List<VegetableDto> vegetableDtos, Authentication authentication) {
         String username = authentication.getName();
         UserProfile userProfile = userProfileRepository.findByUser_Username(username);
 
@@ -38,7 +44,12 @@ public class AdvertService {
             throw new RuntimeException("UserProfile not found for user: " + username);
         }
 
-        Advert advert = new Advert(title, description, userProfile);
+        List<Vegetable> vegetables = vegetableDtos.stream()
+                .map(vegetableDto -> vegetableRepository.findByName(vegetableDto.getName())
+                        .orElseThrow(() -> new RuntimeException("Vegetable not found: " + vegetableDto.getName())))
+                .collect(Collectors.toList());
+
+        Advert advert = new Advert(title, description,userProfile, vegetables);
         Advert savedAdvert = advertRepository.save(advert);
 
         User user = userProfile.getUser();
@@ -72,12 +83,18 @@ public class AdvertService {
     }
 
     private AdvertDto mapToDto(Advert advert) {
+
+        List<VegetableDto> vegetableDtos = advert.getVegetables().stream()
+                .map(veg -> new VegetableDto(veg.getCategory(), veg.getName()))
+                .collect(Collectors.toList());
+
         return new AdvertDto(
                 advert.getId(),
                 advert.getTitle(),
                 advert.getDescription(),
                 advert.getCreatedDate(),
-                advert.getUserProfile().getUsername()
+                advert.getUserProfile().getUsername(),
+                vegetableDtos
         );
     }
 

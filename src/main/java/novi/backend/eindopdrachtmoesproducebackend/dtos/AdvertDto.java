@@ -1,6 +1,9 @@
 package novi.backend.eindopdrachtmoesproducebackend.dtos;
 
+import novi.backend.eindopdrachtmoesproducebackend.models.Vegetable;
+
 import java.time.LocalDate;
+import java.util.List;
 
 public class AdvertDto {
 
@@ -8,18 +11,28 @@ public class AdvertDto {
     private String title;
     private String description;
     private LocalDate createdDate;
-    private String username;
+    private String username; 
+    private List<VegetableDto> vegetables;
 
     public AdvertDto(){
 
     }
 
-    public AdvertDto(Long id, String title, String description, LocalDate createdDate, String username) {
+    public AdvertDto(Long id, String title, String description, LocalDate createdDate, String username, List<VegetableDto> vegetables) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.createdDate = createdDate;
         this.username = username;
+        this.vegetables = vegetables;
+    }
+
+    public List<VegetableDto> getVegetables() {
+        return vegetables;
+    }
+
+    public void setVegetables(List<VegetableDto> vegetables) {
+        this.vegetables = vegetables;
     }
         public LocalDate getCreatedDate() {
         return createdDate;
