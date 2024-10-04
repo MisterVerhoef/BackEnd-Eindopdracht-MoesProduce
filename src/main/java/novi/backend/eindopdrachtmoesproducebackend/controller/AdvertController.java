@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
-
+@CrossOrigin
 @RestController
 @RequestMapping("/api/adverts")
 public class AdvertController {

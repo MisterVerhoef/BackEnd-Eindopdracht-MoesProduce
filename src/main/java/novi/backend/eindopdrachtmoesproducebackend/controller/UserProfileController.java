@@ -2,6 +2,7 @@ package novi.backend.eindopdrachtmoesproducebackend.controller;
 
 import jakarta.validation.Valid;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.UserProfileDto;
+import novi.backend.eindopdrachtmoesproducebackend.models.FileUploadResponse;
 import novi.backend.eindopdrachtmoesproducebackend.service.UserProfileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,13 +11,17 @@ import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/users/profile")
 public class UserProfileController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserProfileController.class);
+
     private final UserProfileService userProfileService;
+
 
     @Autowired
     public UserProfileController(UserProfileService userProfileService) {
@@ -58,4 +63,13 @@ public class UserProfileController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @PostMapping("/{userId}/photo")
+    public void assignImageToUserProfile(@PathVariable Long userId, @RequestBody MultipartFile file) {
+
+        FileUploadResponse photo = photoController.singleFileUpload(file);
+
+        userProfileService.assignImageToUserProfile(userId, photo.getFileName());
+    }
+
 }
