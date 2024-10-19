@@ -18,6 +18,14 @@ public class UserProfile {
 
     private String address;
 
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "profile_image_id", referencedColumnName = "id")
+    private UploadedFile profileImage;
+
+
+
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -92,5 +100,13 @@ public class UserProfile {
 
     public String getUsername() {
         return user.getUsername();
+    }
+
+    public UploadedFile getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(UploadedFile profileImage) {
+        this.profileImage = profileImage;
     }
 }

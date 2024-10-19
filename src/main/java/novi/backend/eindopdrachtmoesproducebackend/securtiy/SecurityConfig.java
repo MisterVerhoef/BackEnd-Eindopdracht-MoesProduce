@@ -42,14 +42,15 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain filter(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configure(http))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(new AntPathRequestMatcher("/api/users/register"), new AntPathRequestMatcher("/api/users/login")).permitAll() // Openbare routes
-                        .requestMatchers(new AntPathRequestMatcher("/api/admin/**")).hasRole("ADMIN") // Alleen voor admin
-                        .requestMatchers(new AntPathRequestMatcher("/api/adverts/**")).authenticated()
+                        .requestMatchers("/api/users/register", "/api/users/login").permitAll() // Openbare routes
+                        .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // Alleen voor admin
+                        .requestMatchers("/api/adverts/**").authenticated()
                         .anyRequest().authenticated() // Alle andere routes vereisen authenticatie
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

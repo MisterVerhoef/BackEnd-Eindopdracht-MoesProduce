@@ -13,6 +13,7 @@ public class AdvertDto {
     private LocalDate createdDate;
     private String username; 
     private List<VegetableDto> vegetables;
+    private List<String> imageUrls;
 
     public AdvertDto(){
 
@@ -25,6 +26,14 @@ public class AdvertDto {
         this.createdDate = createdDate;
         this.username = username;
         this.vegetables = vegetables;
+    }
+
+    public List<String> getImageUrls() {
+        return imageUrls;
+    }
+
+    public void setImageUrls(List<String> imageUrls) {
+        this.imageUrls = imageUrls;
     }
 
     public List<VegetableDto> getVegetables() {

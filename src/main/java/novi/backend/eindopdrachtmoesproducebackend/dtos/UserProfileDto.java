@@ -8,6 +8,7 @@ public class UserProfileDto {
     private String address;
     private String username;
     private String email;
+    private String profileImageUrl;
 
     public UserProfileDto() {}
 
@@ -69,5 +70,13 @@ public class UserProfileDto {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }

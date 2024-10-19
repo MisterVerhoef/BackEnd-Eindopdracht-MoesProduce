@@ -1,8 +1,11 @@
 package novi.backend.eindopdrachtmoesproducebackend.controller;
 
 import jakarta.validation.Valid;
+import novi.backend.eindopdrachtmoesproducebackend.dtos.UploadedFileResponseDto;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.UserProfileDto;
-import novi.backend.eindopdrachtmoesproducebackend.models.FileUploadResponse;
+import novi.backend.eindopdrachtmoesproducebackend.models.UploadedFile;
+import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
+import novi.backend.eindopdrachtmoesproducebackend.service.UploadedFileService;
 import novi.backend.eindopdrachtmoesproducebackend.service.UserProfileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @CrossOrigin
 @RestController
@@ -20,7 +24,11 @@ public class UserProfileController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserProfileController.class);
 
-    private final UserProfileService userProfileService;
+    @Autowired
+    private UserProfileService userProfileService;
+
+    @Autowired
+    private UploadedFileService uploadedFileService;
 
 
     @Autowired
@@ -64,12 +72,33 @@ public class UserProfileController {
         }
     }
 
-    @PostMapping("/{userId}/photo")
-    public void assignImageToUserProfile(@PathVariable Long userId, @RequestBody MultipartFile file) {
+    @PostMapping("/upload-profile-image")
+    public ResponseEntity<UploadedFileResponseDto> uploadProfileImage(
+            @RequestParam("file") MultipartFile file,
+            Authentication authentication)
+        {
+        try {
+            String username = authentication.getName();
+            UserProfile userProfile = userProfileService.getUserProfileEntity(username);
 
-        FileUploadResponse photo = photoController.singleFileUpload(file);
+            UploadedFile uploadedFile = uploadedFileService.storeFile(file);
 
-        userProfileService.assignImageToUserProfile(userId, photo.getFileName());
+            userProfile.setProfileImage(uploadedFile);
+            userProfileService.saveUserProfile(userProfile);
+
+            String imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/uploads/")
+                    .path(uploadedFile.getFileName())
+                    .toUriString();
+
+            // Maak de response DTO
+            UploadedFileResponseDto responseDto = new UploadedFileResponseDto(uploadedFile.getFileName(), imageUrl);
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            logger.error("Error uploading profile image for user: {}", authentication.getName(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
-
 }
+

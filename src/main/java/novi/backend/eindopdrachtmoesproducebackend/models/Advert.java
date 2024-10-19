@@ -3,6 +3,7 @@ package novi.backend.eindopdrachtmoesproducebackend.models;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -33,6 +34,10 @@ public class Advert {
     public Advert() {
         this.createdDate = LocalDate.now();
     }
+
+    @OneToMany(mappedBy = "advert", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UploadedFile> photos = new ArrayList<>();
+
 
 
 
@@ -107,5 +112,14 @@ public class Advert {
     public void prePersist() {
 
         this.createdDate = LocalDate.now(); // Stelt de datum in op het moment van plaatsing
+    }
+
+    public List<UploadedFile> getPhotos() {
+        return photos;
+    }
+
+
+    public void setPhotos(List<UploadedFile> photos) {
+        this.photos = photos;
     }
 }
