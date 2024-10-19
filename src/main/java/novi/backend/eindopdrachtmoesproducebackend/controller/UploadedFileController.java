@@ -20,7 +20,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/uploads")
-@CrossOrigin
 public class UploadedFileController {
 
     @Autowired
