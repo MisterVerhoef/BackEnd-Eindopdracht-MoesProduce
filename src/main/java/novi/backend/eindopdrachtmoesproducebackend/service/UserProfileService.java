@@ -2,20 +2,34 @@ package novi.backend.eindopdrachtmoesproducebackend.service;
 
 import jakarta.transaction.Transactional;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.UserProfileDto;
+import novi.backend.eindopdrachtmoesproducebackend.models.UploadedFile;
 import novi.backend.eindopdrachtmoesproducebackend.models.User;
 import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
+import novi.backend.eindopdrachtmoesproducebackend.repositories.UploadedFileRepository;
+import novi.backend.eindopdrachtmoesproducebackend.repositories.UserProfileRepository;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Service
 public class UserProfileService {
 
-    private final UserRepository userRepository;
+    @Autowired
+    private  UserRepository userRepository;
 
     @Autowired
-    public UserProfileService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    private UserProfileRepository userProfileRepository;
+
+    @Autowired
+    private UploadedFileRepository uploadedFileRepository;
+
+    @Autowired
+    private UploadedFileService uploadedFileService;
+
+
+    public UserProfileService() {
+
     }
 
     public UserProfileDto getUserProfile(String username) {
@@ -24,10 +38,14 @@ public class UserProfileService {
 
         UserProfile profile = user.getUserProfile();
         if (profile == null) {
-            throw new RuntimeException("Profile not found");
+            throw new RuntimeException("Profile not found" + username);
         }
 
         return convertToDto(profile, user);
+    }
+
+    public void saveUserProfile(UserProfile userProfile) {
+        userProfileRepository.save(userProfile);
     }
 
     @Transactional
@@ -35,7 +53,7 @@ public class UserProfileService {
         User user = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Update username if changed and not null
+
         if (userProfileDto.getUsername() != null && !currentUsername.equals(userProfileDto.getUsername())) {
             if (userRepository.existsByUsername(userProfileDto.getUsername())) {
                 throw new RuntimeException("Username already taken");
@@ -43,7 +61,7 @@ public class UserProfileService {
             user.setUsername(userProfileDto.getUsername());
         }
 
-        // Update email if changed and not null
+
         if (userProfileDto.getEmail() != null && !user.getEmail().equals(userProfileDto.getEmail())) {
             if (userRepository.existsByEmail(userProfileDto.getEmail())) {
                 throw new RuntimeException("Email already taken");
@@ -51,14 +69,14 @@ public class UserProfileService {
             user.setEmail(userProfileDto.getEmail());
         }
 
-        // Update other profile information
+
         UserProfile profile = user.getUserProfile();
         if (profile == null) {
             profile = new UserProfile();
             user.setUserProfile(profile);
         }
 
-        // Only update fields if they are not null
+
         if (userProfileDto.getName() != null) {
             profile.setName(userProfileDto.getName());
         }
@@ -69,17 +87,100 @@ public class UserProfileService {
             profile.setAddress(userProfileDto.getAddress());
         }
 
-        user = userRepository.save(user);
+        userRepository.save(user);
+        userProfileRepository.save(profile);
+
         return convertToDto(profile, user);
     }
 
+    public UserProfile getUserProfileEntity(String username) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserProfile profile = user.getUserProfile();
+        if (profile == null) {
+            throw new RuntimeException("Profile not found" + username);
+        }
+
+        return profile;
+    }
+
     private UserProfileDto convertToDto(UserProfile profile, User user) {
-        return new UserProfileDto(
+        UserProfileDto dto =  new UserProfileDto(
                 profile.getName(),
                 profile.getDoB(),
                 profile.getAddress(),
                 user.getUsername(),
                 user.getEmail()
         );
+
+        if (profile.getProfileImage()!= null) {
+            String imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/uploads/")
+                   .pathSegment(profile.getProfileImage().getFileName())
+                    .toUriString();
+            dto.setProfileImageUrl(imageUrl);
+        }
+        return dto;
+
+    }
+
+    public UserProfile convertDtoToUserProfile(UserProfileDto userProfileDto) {
+        UserProfile userProfile = new UserProfile();
+
+        if (userProfileDto.getName() != null) {
+            userProfile.setName(userProfileDto.getName());
+        }
+
+        if (userProfileDto.getDoB() != null) {
+            userProfile.setDoB(userProfileDto.getDoB());
+        }
+
+        if (userProfileDto.getAddress() != null) {
+            userProfile.setAddress(userProfileDto.getAddress());
+        }
+
+        return userProfile;
+    }
+
+    @Transactional
+    public void updateProfileImage(String username, String fileName) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserProfile profile = user.getUserProfile();
+        if (profile == null) {
+            profile = new UserProfile();
+            user.setUserProfile(profile);
+        }
+
+        UploadedFile uploadedFile = new UploadedFile();
+        uploadedFile.setFileName(fileName);
+        uploadedFile.setFilePath("uploads/" + fileName);
+        uploadedFile.setUserProfile(profile);
+
+        uploadedFileRepository.save(uploadedFile);
+
+        profile.setProfileImage(uploadedFile);
+
+        userProfileRepository.save(profile);
+    }
+
+    @Transactional
+    public void assignImageToUserProfile(Long userId, String fileName) {
+        UserProfile userProfile = userProfileRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        UploadedFile uploadedFile = new UploadedFile();
+        uploadedFile.setFileName(fileName);
+        uploadedFile.setFilePath("uploads/" + fileName);
+        uploadedFile.setUserProfile(userProfile);
+
+        uploadedFileRepository.save(uploadedFile);
+
+        userProfile.setProfileImage(uploadedFile);
+
+        userProfileRepository.save(userProfile);
     }
 }
