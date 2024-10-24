@@ -51,6 +51,7 @@ public class AdvertController {
 
     @GetMapping("/{id}")
     public ResponseEntity<AdvertDto> getAdvertById(@PathVariable Long id) {
+        advertService.incrementViewCount(id);
         AdvertDto advertDto = advertService.getAdvertById(id);
         return ResponseEntity.ok(advertDto);
     }

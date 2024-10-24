@@ -85,30 +85,6 @@ public class AdvertService {
         return adverts.stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
-//    public AdvertDto getAdvertById(Long id) {
-//        Optional<Advert> optionalAdvert = advertRepository.findById(id);
-//        if (optionalAdvert.isPresent()) {
-//            return mapToDto(optionalAdvert.get());
-//        } else {
-//            throw new RuntimeException("Advert not found with id: " + id);
-//        }
-//    }
-
-//    public AdvertDto getAdvertById(Long id) {
-//        return advertRepository.findById(id)
-//                .map(this::mapToDto)
-//                .orElseThrow(() -> new AdvertNotFoundException(id));
-//    }
-
-//    public Advert getAdvertEntityById(Long id) {
-//        return advertRepository.findById(id)
-//                .orElseThrow(() -> new AdvertNotFoundException(id));
-//    }
-
-//    public AdvertDto getAdvertById(Long id) {
-//        Advert advert = getAdvertEntityById(id);
-//        return mapToDto(advert);
-//    }
 
     private AdvertDto mapToDto(Advert advert) {
 
@@ -129,7 +105,8 @@ public class AdvertService {
                 advert.getDescription(),
                 advert.getCreatedDate(),
                 advert.getUserProfile().getUsername(),
-                vegetableDtos
+                vegetableDtos,
+                advert.getViewCount()
         );
         advertDto.setImageUrls(imageUrls);
 
@@ -187,5 +164,9 @@ public class AdvertService {
         return mapToDto(advert);
     }
 
+    @Transactional
+    public void incrementViewCount(Long advertId) {
+        advertRepository.incrementViewCount(advertId);
+    }
 
 }
