@@ -33,7 +33,7 @@ public class UserProfileService {
     }
 
     public UserProfileDto getUserProfile(String username) {
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         UserProfile profile = user.getUserProfile();
@@ -50,12 +50,12 @@ public class UserProfileService {
 
     @Transactional
     public UserProfileDto updateUserProfile(String currentUsername, UserProfileDto userProfileDto) {
-        User user = userRepository.findByUsername(currentUsername)
+        User user = userRepository.findByUsernameIgnoreCase(currentUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
 
         if (userProfileDto.getUsername() != null && !currentUsername.equals(userProfileDto.getUsername())) {
-            if (userRepository.existsByUsername(userProfileDto.getUsername())) {
+            if (userRepository.existsByUsernameIgnoreCase(userProfileDto.getUsername())) {
                 throw new RuntimeException("Username already taken");
             }
             user.setUsername(userProfileDto.getUsername());
@@ -63,7 +63,7 @@ public class UserProfileService {
 
 
         if (userProfileDto.getEmail() != null && !user.getEmail().equals(userProfileDto.getEmail())) {
-            if (userRepository.existsByEmail(userProfileDto.getEmail())) {
+            if (userRepository.existsByEmailIgnoreCase(userProfileDto.getEmail())) {
                 throw new RuntimeException("Email already taken");
             }
             user.setEmail(userProfileDto.getEmail());
@@ -95,7 +95,7 @@ public class UserProfileService {
 
     public UserProfile getUserProfileEntity(String username) {
 
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         UserProfile profile = user.getUserProfile();
@@ -146,7 +146,7 @@ public class UserProfileService {
 
     @Transactional
     public void updateProfileImage(String username, String fileName) {
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         UserProfile profile = user.getUserProfile();

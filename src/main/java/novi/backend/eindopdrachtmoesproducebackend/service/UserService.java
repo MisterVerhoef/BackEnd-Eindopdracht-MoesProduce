@@ -37,10 +37,10 @@ public class UserService {
 
     @Transactional
     public User registerUser(String email, String username, String password, boolean termsAccepted) {
-        if (userRepository.existsByEmail(email)) {
+        if (userRepository.existsByEmailIgnoreCase(email)) {
             throw new RuntimeException("Email is al in gebruik");
         }
-        if (userRepository.existsByUsername(username)) {
+        if (userRepository.existsByUsernameIgnoreCase(username)) {
             throw new RuntimeException("Gebruikersnaam is al in gebruik");
         }
         if (!termsAccepted) {
@@ -86,10 +86,10 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!user.getEmail().equals(email) && userRepository.existsByEmail(email)) {
+        if (!user.getEmail().equals(email) && userRepository.existsByEmailIgnoreCase(email)) {
             throw new RuntimeException("Email already in use");
         }
-        if (!user.getUsername().equals(username) && userRepository.existsByUsername(username)) {
+        if (!user.getUsername().equals(username) && userRepository.existsByUsernameIgnoreCase(username)) {
             throw new RuntimeException("Username already in use");
         }
 

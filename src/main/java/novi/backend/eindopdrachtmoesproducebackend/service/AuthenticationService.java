@@ -2,6 +2,8 @@ package novi.backend.eindopdrachtmoesproducebackend.service;
 
 
 import novi.backend.eindopdrachtmoesproducebackend.dtos.LoginResponseDto;
+import novi.backend.eindopdrachtmoesproducebackend.repositories.UserRepository;
+import novi.backend.eindopdrachtmoesproducebackend.securtiy.CustomUserDetails;
 import novi.backend.eindopdrachtmoesproducebackend.securtiy.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,20 +18,29 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
     @Autowired
     public AuthenticationService(AuthenticationManager authenticationManager,
                                  UserDetailsService userDetailsService,
-                                 JwtUtil jwtUtil) {
+                                 JwtUtil jwtUtil,
+                                 UserRepository userRepository) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.jwtUtil = jwtUtil;
+        this.userRepository = userRepository;
     }
 
-    public LoginResponseDto login(String username, String password) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    public LoginResponseDto login(String usernameOrEmail, String password) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(usernameOrEmail, password));
+
+        var user = userRepository.findByUsernameOrEmail(usernameOrEmail)
+                .orElseThrow(() -> new RuntimeException("Invalid username/email or password"));
+
+        var userDetails = new CustomUserDetails(user);
+
         String token = jwtUtil.generateToken(userDetails);
+
         return new LoginResponseDto(token);
     }
 
