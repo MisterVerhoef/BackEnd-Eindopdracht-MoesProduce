@@ -19,6 +19,7 @@ public class GlobalCorsConfiguration implements WebMvcConfigurer {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.addAllowedOrigin("http://localhost:5173");
+        configuration.addAllowedOrigin("http://192.168.3.30:5173");
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

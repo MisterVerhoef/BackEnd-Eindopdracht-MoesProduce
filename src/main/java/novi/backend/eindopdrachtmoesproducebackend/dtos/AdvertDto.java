@@ -14,19 +14,24 @@ public class AdvertDto {
     private String username; 
     private List<VegetableDto> vegetables;
     private List<String> imageUrls;
+    private int viewCount;
+
 
     public AdvertDto(){
 
     }
 
-    public AdvertDto(Long id, String title, String description, LocalDate createdDate, String username, List<VegetableDto> vegetables) {
+    public AdvertDto(Long id, String title, String description, LocalDate createdDate, String username, List<VegetableDto> vegetables, int viewCount) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.createdDate = createdDate;
         this.username = username;
         this.vegetables = vegetables;
+        this.viewCount = viewCount;
     }
+
+
 
     public List<String> getImageUrls() {
         return imageUrls;
@@ -81,5 +86,13 @@ public class AdvertDto {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public int getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(int viewCount) {
+        this.viewCount = viewCount;
     }
 }

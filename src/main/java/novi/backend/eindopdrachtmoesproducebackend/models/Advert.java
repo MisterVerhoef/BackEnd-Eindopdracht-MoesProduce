@@ -17,6 +17,8 @@ public class Advert {
     private String title;
     private String description;
 
+    private int viewCount = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_profile_id", nullable = false)
     private UserProfile userProfile;
@@ -49,6 +51,13 @@ public class Advert {
         this.vegetables = vegetables; // Groenten toevoegen aan advert
     }
 
+    public int getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(int viewCount) {
+        viewCount = viewCount;
+    }
 
     public List<Vegetable> getVegetables() {
         return vegetables;
