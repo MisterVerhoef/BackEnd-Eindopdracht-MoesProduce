@@ -85,6 +85,10 @@ public class AdvertService {
         return adverts.stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
+    public List<AdvertDto> searchAdverts(String query) {
+        List<Advert> adverts = advertRepository.searchByTitle(query);
+        return adverts.stream().map(this::mapToDto).collect(Collectors.toList());
+    }
 
     private AdvertDto mapToDto(Advert advert) {
 
@@ -162,6 +166,11 @@ public class AdvertService {
     public AdvertDto getAdvertById(Long id) {
         Advert advert = getAdvertEntityById(id);
         return mapToDto(advert);
+    }
+
+    public List<AdvertDto> getAdvertsByUsername(String username) {
+        List<Advert> adverts = advertRepository.findByUserProfile_User_Username(username);
+        return adverts.stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
     @Transactional
