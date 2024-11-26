@@ -184,7 +184,9 @@ public class AdvertService {
         }
 
         userProfile.getSavedAdverts().add(advert);
+        advert.incrementSaveCount();
         userProfileRepository.save(userProfile);
+        advertRepository.save(advert);
     }
 
     @Transactional
@@ -198,7 +200,9 @@ public class AdvertService {
         }
 
         userProfile.getSavedAdverts().remove(advert);
+        advert.decrementSaveCount();
         userProfileRepository.save(userProfile);
+        advertRepository.save(advert);
     }
 
     public List<AdvertDto> getSavedAdverts(String username) {
