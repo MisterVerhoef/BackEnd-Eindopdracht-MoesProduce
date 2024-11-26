@@ -19,6 +19,9 @@ public class Advert {
 
     private int viewCount = 0;
 
+    @Column(nullable = false)
+    private int saveCount = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_profile_id", nullable = false)
     private UserProfile userProfile;
@@ -57,6 +60,24 @@ public class Advert {
 
     public void setViewCount(int viewCount) {
         viewCount = viewCount;
+    }
+
+    public int getSaveCount() {
+        return saveCount;
+    }
+
+    public void setSaveCount(int saveCount) {
+        this.saveCount = saveCount;
+    }
+
+    public void incrementSaveCount() {
+        saveCount++;
+    }
+
+    public void decrementSaveCount() {
+        if (saveCount > 0) {
+            saveCount--;
+        }
     }
 
     public List<Vegetable> getVegetables() {
