@@ -2,6 +2,7 @@ package novi.backend.eindopdrachtmoesproducebackend.models;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -18,13 +19,9 @@ public class UserProfile {
 
     private String address;
 
-
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "profile_image_id", referencedColumnName = "id")
     private UploadedFile profileImage;
-
-
-
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -32,6 +29,14 @@ public class UserProfile {
 
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Advert> adverts;
+
+    @ManyToMany
+    @JoinTable(
+            name = "saved_adverts",
+            joinColumns = @JoinColumn(name = "user_profile_id"),
+            inverseJoinColumns = @JoinColumn(name = "advert_id")
+    )
+    private List<Advert> savedAdverts = new ArrayList<>();
 
     public UserProfile() {
     }
@@ -41,7 +46,6 @@ public class UserProfile {
         this.doB = doB;
         this.address = address;
     }
-
 
     public UserProfile(String name, LocalDate doB, User user, String address) {
         this.name = name;
@@ -96,6 +100,14 @@ public class UserProfile {
 
     public void setAdverts(List<Advert> adverts) {
         this.adverts = adverts;
+    }
+
+    public List<Advert> getSavedAdverts() {
+        return savedAdverts;
+    }
+
+    public void setSavedAdverts(List<Advert> savedAdverts) {
+        this.savedAdverts = savedAdverts;
     }
 
     public String getUsername() {

@@ -108,7 +108,7 @@ public class AdvertService {
                 advert.getTitle(),
                 advert.getDescription(),
                 advert.getCreatedDate(),
-                advert.getUserProfile().getUsername(),
+                advert.getUserProfile().getUser().getUsername(),
                 vegetableDtos,
                 advert.getViewCount()
         );
@@ -171,6 +171,41 @@ public class AdvertService {
     public List<AdvertDto> getAdvertsByUsername(String username) {
         List<Advert> adverts = advertRepository.findByUserProfile_User_Username(username);
         return adverts.stream().map(this::mapToDto).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void saveAdvert(Long advertId, String username) {
+        Advert advert = advertRepository.findById(advertId)
+                .orElseThrow(() -> new RuntimeException("Advert not found with id: " + advertId));
+        UserProfile userProfile = userProfileRepository.findByUser_Username(username);
+
+        if (userProfile.getSavedAdverts().contains(advert)) {
+            throw new RuntimeException("Advert is already saved.");
+        }
+
+        userProfile.getSavedAdverts().add(advert);
+        userProfileRepository.save(userProfile);
+    }
+
+    @Transactional
+    public void unsaveAdvert(Long advertId, String username) {
+        Advert advert = advertRepository.findById(advertId)
+                .orElseThrow(() -> new RuntimeException("Advert not found with id: " + advertId));
+        UserProfile userProfile = userProfileRepository.findByUser_Username(username);
+
+        if (!userProfile.getSavedAdverts().contains(advert)) {
+            throw new RuntimeException("Advert is not saved.");
+        }
+
+        userProfile.getSavedAdverts().remove(advert);
+        userProfileRepository.save(userProfile);
+    }
+
+    public List<AdvertDto> getSavedAdverts(String username) {
+        UserProfile userProfile = userProfileRepository.findByUser_Username(username);
+        return userProfile.getSavedAdverts().stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional

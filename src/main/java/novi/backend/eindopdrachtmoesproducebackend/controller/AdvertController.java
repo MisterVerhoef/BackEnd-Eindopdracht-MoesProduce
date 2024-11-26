@@ -122,9 +122,29 @@ public class AdvertController {
 
     @GetMapping("/user")
     public ResponseEntity<List<AdvertDto>> getAdvertsByUser(Principal principal) {
-        String username = principal.getName(); // Haal de huidige ingelogde gebruikersnaam op
+        String username = principal.getName();
         List<AdvertDto> userAdverts = advertService.getAdvertsByUsername(username);
         return ResponseEntity.ok(userAdverts);
+    }
+
+    @PostMapping("/{id}/save")
+    public ResponseEntity<Void> saveAdvert(@PathVariable Long id, Principal principal) {
+        advertService.saveAdvert(id, principal.getName());
+        return ResponseEntity.ok().build();
+    }
+
+
+    @PostMapping("/{id}/unsave")
+    public ResponseEntity<Void> unsaveAdvert(@PathVariable Long id, Principal principal) {
+        advertService.unsaveAdvert(id, principal.getName());
+        return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping("/saved")
+    public ResponseEntity<List<AdvertDto>> getSavedAdverts(Principal principal) {
+        List<AdvertDto> savedAdverts = advertService.getSavedAdverts(principal.getName());
+        return ResponseEntity.ok(savedAdverts);
     }
 
 }
