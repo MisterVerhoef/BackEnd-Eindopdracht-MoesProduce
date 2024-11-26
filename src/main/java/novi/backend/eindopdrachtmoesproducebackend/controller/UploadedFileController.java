@@ -34,11 +34,7 @@ public class UploadedFileController {
     @Autowired
     private UserRepository userRepository;
 
-//    public UploadedFileController(UploadedFileService uploadedFileService, UserProfileService userProfileService, AdvertService advertService) {
-//        this.uploadedFileService = uploadedFileService;
-//        this.userProfileService = userProfileService;
-//        this.advertService = advertService;
-//    }
+
 
     @PostMapping("/profile")
     public ResponseEntity<UploadedFileResponseDto> uploadProfileImage(
@@ -91,7 +87,7 @@ public class UploadedFileController {
             return ResponseEntity.ok(responseDto);
 
         } catch (Exception e) {
-            e.printStackTrace(); // Add this line for debugging
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

@@ -129,17 +129,17 @@ INSERT INTO vegetables (name, category) VALUES ('Okra', 'Exotische gewassen (kas
 INSERT INTO vegetables (name, category) VALUES ('Paksoi', 'Exotische gewassen (kas)');
 
 -- Sample data for advertisements in data.sql
-INSERT INTO adverts (id, title, description, created_date, user_profile_id, view_count) VALUES
-                                                                                            (1, 'Rode Biet', 'Haal 20 kg van de meest verse, handgeplukte rode bieten op in het hart van Breda. Perfect voor een stevige stamppot!', '2024-11-08', 1, 0),
-                                                                                            (2, 'Wortelen', 'Verse, knapperige wortelen, 15 kg, rechtstreeks van het veld in Rotterdam. Ideaal voor een gezonde snack of salade.', '2024-11-08', 1, 0),
-                                                                                            (3, 'Sperziebonen', 'Proef de zomer met 10 kg sperziebonen uit Amsterdam, knapperig en vol van smaak!', '2024-11-08', 2, 0),
-                                                                                            (4, 'Courgette', '25 kg verse courgettes beschikbaar in Utrecht. Perfect voor grillen, bakken of een heerlijk courgettetaart.', '2024-11-08', 2, 0),
-                                                                                            (5, 'Pompoen', '10 prachtige pompoenen, ideaal voor soepen of herfstdecoratie, af te halen in Den Haag.', '2024-11-08', 3, 0);
-
--- Sample data for vegetables in data.sql
-INSERT INTO advert_vegetables (advert_id, vegetable_id) VALUES
-                                                            (1, 1),
-                                                            (2, 2),
-                                                            (3, 3),
-                                                            (4, 4),
-                                                            (5, 5);
+-- INSERT INTO adverts (id, title, description, created_date, user_profile_id, view_count) VALUES
+--                                                                                             (1, 'Rode Biet', 'Haal 20 kg van de meest verse, handgeplukte rode bieten op in het hart van Breda. Perfect voor een stevige stamppot!', '2024-11-08', 1, 0),
+--                                                                                             (2, 'Wortelen', 'Verse, knapperige wortelen, 15 kg, rechtstreeks van het veld in Rotterdam. Ideaal voor een gezonde snack of salade.', '2024-11-08', 1, 0),
+--                                                                                             (3, 'Sperziebonen', 'Proef de zomer met 10 kg sperziebonen uit Amsterdam, knapperig en vol van smaak!', '2024-11-08', 2, 0),
+--                                                                                             (4, 'Courgette', '25 kg verse courgettes beschikbaar in Utrecht. Perfect voor grillen, bakken of een heerlijk courgettetaart.', '2024-11-08', 2, 0),
+--                                                                                             (5, 'Pompoen', '10 prachtige pompoenen, ideaal voor soepen of herfstdecoratie, af te halen in Den Haag.', '2024-11-08', 3, 0);
+--
+-- -- Sample data for vegetables in data.sql
+-- INSERT INTO advert_vegetables (advert_id, vegetable_id) VALUES
+--                                                             (1, 1),
+--                                                             (2, 2),
+--                                                             (3, 3),
+--                                                             (4, 4),
+--                                                             (5, 5);

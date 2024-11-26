@@ -23,7 +23,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.security.Principal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -54,6 +56,14 @@ public class AdvertController {
         advertService.incrementViewCount(id);
         AdvertDto advertDto = advertService.getAdvertById(id);
         return ResponseEntity.ok(advertDto);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<AdvertDto>> searchAdverts(@RequestParam("query") String query) {
+
+        List<AdvertDto> results = advertService.searchAdverts(query);
+
+        return ResponseEntity.ok(results);
     }
 
     @PostMapping
@@ -108,7 +118,34 @@ public class AdvertController {
             logger.error("Error uploading advert image", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+}
+
+    @GetMapping("/user")
+    public ResponseEntity<List<AdvertDto>> getAdvertsByUser(Principal principal) {
+        String username = principal.getName();
+        List<AdvertDto> userAdverts = advertService.getAdvertsByUsername(username);
+        return ResponseEntity.ok(userAdverts);
+    }
+
+    @PostMapping("/{id}/save")
+    public ResponseEntity<Void> saveAdvert(@PathVariable Long id, Principal principal) {
+        advertService.saveAdvert(id, principal.getName());
+        return ResponseEntity.ok().build();
     }
 
 
+    @PostMapping("/{id}/unsave")
+    public ResponseEntity<Void> unsaveAdvert(@PathVariable Long id, Principal principal) {
+        advertService.unsaveAdvert(id, principal.getName());
+        return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping("/saved")
+    public ResponseEntity<List<AdvertDto>> getSavedAdverts(Principal principal) {
+        List<AdvertDto> savedAdverts = advertService.getSavedAdverts(principal.getName());
+        return ResponseEntity.ok(savedAdverts);
+    }
+
 }
+
