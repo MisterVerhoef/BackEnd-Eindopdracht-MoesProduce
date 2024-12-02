@@ -1,7 +1,9 @@
 package novi.backend.eindopdrachtmoesproducebackend.securtiy;
+import org.springframework.http.HttpMethod;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -51,7 +53,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/register", "/api/users/login").permitAll() // Openbare routes
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // Alleen voor admin
-                        .requestMatchers("/api/adverts/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/adverts/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/adverts/**").authenticated()
                         .anyRequest().authenticated() // Alle andere routes vereisen authenticatie
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

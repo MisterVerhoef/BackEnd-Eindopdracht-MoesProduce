@@ -15,6 +15,7 @@ public class AdvertDto {
     private List<VegetableDto> vegetables;
     private List<String> imageUrls;
     private int viewCount;
+    private int saveCount;
 
 
     public AdvertDto(){
@@ -29,6 +30,7 @@ public class AdvertDto {
         this.username = username;
         this.vegetables = vegetables;
         this.viewCount = viewCount;
+
     }
 
 
@@ -94,5 +96,12 @@ public class AdvertDto {
 
     public void setViewCount(int viewCount) {
         this.viewCount = viewCount;
+    }
+
+    public int getSaveCount() {
+        return saveCount;
+    }
+    public void setSaveCount(int saveCount) {
+        this.saveCount = saveCount;
     }
 }
