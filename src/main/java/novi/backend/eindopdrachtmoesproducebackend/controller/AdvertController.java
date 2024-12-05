@@ -147,5 +147,11 @@ public class AdvertController {
         return ResponseEntity.ok(savedAdverts);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAdvert(@PathVariable Long id) {
+        advertService.deleteAdvert(id);
+        return ResponseEntity.ok().build();
+    }
+
 }
 

@@ -63,7 +63,7 @@ public class AdvertService {
                         .orElseThrow(() -> new RuntimeException("Vegetable not found: " + dto.getName())))
                 .collect(Collectors.toList());
 
-        Advert advert = new Advert(title, description,userProfile, vegetables);
+        Advert advert = new Advert(title, description, userProfile, vegetables);
         Advert savedAdvert = advertRepository.save(advert);
 
         User user = userProfile.getUser();
@@ -218,4 +218,10 @@ public class AdvertService {
         advertRepository.incrementViewCount(advertId);
     }
 
+    @Transactional
+    public void deleteAdvert(Long id) {
+        Advert advert = advertRepository.findById(id)
+                .orElseThrow(() -> new AdvertNotFoundException(id));
+
+    }
 }
