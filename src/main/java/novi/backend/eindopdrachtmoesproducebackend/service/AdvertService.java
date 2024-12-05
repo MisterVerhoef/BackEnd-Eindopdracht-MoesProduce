@@ -113,6 +113,7 @@ public class AdvertService {
                 advert.getViewCount()
         );
         advertDto.setImageUrls(imageUrls);
+        advertDto.setSaveCount(advert.getSaveCount());
 
 
         return advertDto;
@@ -133,7 +134,7 @@ public class AdvertService {
         Advert advert = advertRepository.findById(advertId)
                 .orElseThrow(() -> new RuntimeException("Advert not found with id: " + advertId));
 
-        // Check if the current user is the owner of the advert
+
         if (!advert.getUserProfile().getUser().getUsername().equals(username)) {
             throw new RuntimeException("User is not authorized to modify this advert");
         }
@@ -184,7 +185,9 @@ public class AdvertService {
         }
 
         userProfile.getSavedAdverts().add(advert);
+        advert.incrementSaveCount();
         userProfileRepository.save(userProfile);
+        advertRepository.save(advert);
     }
 
     @Transactional
@@ -198,7 +201,9 @@ public class AdvertService {
         }
 
         userProfile.getSavedAdverts().remove(advert);
+        advert.decrementSaveCount();
         userProfileRepository.save(userProfile);
+        advertRepository.save(advert);
     }
 
     public List<AdvertDto> getSavedAdverts(String username) {
