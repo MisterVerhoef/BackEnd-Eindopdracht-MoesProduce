@@ -154,6 +154,12 @@ public class AdvertService {
             throw new RuntimeException("User is not authorized to delete this advert");
         }
 
+        List<UserProfile> allUsersWhoSaved = userProfileRepository.findAllBySavedAdvertsContains(advert);
+        for (UserProfile userProfile : allUsersWhoSaved) {
+            userProfile.getSavedAdverts().remove(advert);
+            userProfileRepository.save(userProfile);
+        }
+
         // Verwijder gekoppelde foto's
         List<UploadedFile> photos = advert.getPhotos();
         uploadedFileRepository.deleteAll(photos);
