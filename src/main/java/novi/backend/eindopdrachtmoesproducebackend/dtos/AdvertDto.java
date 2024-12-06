@@ -104,4 +104,7 @@ public class AdvertDto {
     public void setSaveCount(int saveCount) {
         this.saveCount = saveCount;
     }
+
+
+
 }
