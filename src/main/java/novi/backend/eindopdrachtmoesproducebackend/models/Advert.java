@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "adverts")  // Naam van de database tabel)
+@Table(name = "adverts")
 public class Advert {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)  // Gebruikt een auto-incremente ID (Primary Key)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
@@ -44,14 +44,12 @@ public class Advert {
     private List<UploadedFile> photos = new ArrayList<>();
 
 
-
-
     public Advert(String title, String description, UserProfile userProfile, List<Vegetable> vegetables) {
         this.title = title;
         this.description = description;
         this.userProfile = userProfile;
-        this.createdDate = LocalDate.now();// Datum wordt automatisch ingesteld
-        this.vegetables = vegetables; // Groenten toevoegen aan advert
+        this.createdDate = LocalDate.now();
+        this.vegetables = vegetables;
     }
 
     public int getViewCount() {
@@ -141,7 +139,7 @@ public class Advert {
     @PrePersist
     public void prePersist() {
 
-        this.createdDate = LocalDate.now(); // Stelt de datum in op het moment van plaatsing
+        this.createdDate = LocalDate.now();
     }
 
     public List<UploadedFile> getPhotos() {

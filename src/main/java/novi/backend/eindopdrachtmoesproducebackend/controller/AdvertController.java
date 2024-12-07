@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.AdvertDto;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.UploadedFileResponseDto;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.VegetableDto;
-import novi.backend.eindopdrachtmoesproducebackend.models.Advert;
 import novi.backend.eindopdrachtmoesproducebackend.models.UploadedFile;
-import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
-import novi.backend.eindopdrachtmoesproducebackend.repositories.AdvertRepository;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserProfileRepository;
 import novi.backend.eindopdrachtmoesproducebackend.service.AdvertService;
 import novi.backend.eindopdrachtmoesproducebackend.service.UploadedFileService;
@@ -18,15 +15,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.stream.Collectors;
-
 
 @RestController
 @RequestMapping("/api/adverts")
@@ -60,9 +55,7 @@ public class AdvertController {
 
     @GetMapping("/search")
     public ResponseEntity<List<AdvertDto>> searchAdverts(@RequestParam("query") String query) {
-
         List<AdvertDto> results = advertService.searchAdverts(query);
-
         return ResponseEntity.ok(results);
     }
 
@@ -75,9 +68,7 @@ public class AdvertController {
             Authentication authentication) {
 
         try {
-            List<VegetableDto> vegetables = objectMapper.readValue(vegetablesJson,
-                    new TypeReference<List<VegetableDto>>(){});
-
+            List<VegetableDto> vegetables = objectMapper.readValue(vegetablesJson, new TypeReference<>(){});
             logger.info("Received create advert request. Title: {}, Description: {}, Vegetables count: {}, Images count: {}",
                     title, description, vegetables.size(), images.size());
 
@@ -92,7 +83,6 @@ public class AdvertController {
         }
     }
 
-
     @PostMapping("/{advertId}/upload-image")
     public ResponseEntity<UploadedFileResponseDto> uploadAdvertImage(
             @PathVariable Long advertId,
@@ -102,7 +92,6 @@ public class AdvertController {
             String username = authentication.getName();
 
             UploadedFile uploadedFile = uploadedFileService.storeFile(file);
-
             advertService.addImageToAdvert(advertId, uploadedFile.getFileName(), username);
 
             String imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -118,7 +107,7 @@ public class AdvertController {
             logger.error("Error uploading advert image", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-}
+    }
 
     @GetMapping("/user")
     public ResponseEntity<List<AdvertDto>> getAdvertsByUser(Principal principal) {
@@ -133,13 +122,11 @@ public class AdvertController {
         return ResponseEntity.ok().build();
     }
 
-
     @PostMapping("/{id}/unsave")
     public ResponseEntity<Void> unsaveAdvert(@PathVariable Long id, Principal principal) {
         advertService.unsaveAdvert(id, principal.getName());
         return ResponseEntity.ok().build();
     }
-
 
     @GetMapping("/saved")
     public ResponseEntity<List<AdvertDto>> getSavedAdverts(Principal principal) {
@@ -147,5 +134,13 @@ public class AdvertController {
         return ResponseEntity.ok(savedAdverts);
     }
 
-}
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAdvert(@PathVariable Long id, Authentication authentication) {
+        // Controleer of de ingelogde gebruiker gemachtigd is
+        advertService.checkUserAuthorization(authentication, id);
+        // Verwijder de advertentie
+        advertService.deleteAdvert(id, authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
 
+}
