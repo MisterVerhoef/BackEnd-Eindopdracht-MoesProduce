@@ -195,9 +195,37 @@ VALUES ('Rode Biet',
        ('Pompoen', '10 prachtige pompoenen, ideaal voor soepen of herfstdecoratie, af te halen in Den Haag.',
         '2024-11-08', 3, 0, 0);
 
+
+
 -- Sample data for vegetables in data.sql
 INSERT INTO advert_vegetables (advert_id, vegetable_id)
 SELECT a.id, v.id
 FROM adverts a
          JOIN vegetables v ON v.name IN ('Rode biet', 'Wortel', 'Sperziebonen', 'Courgette', 'Pompoen')
 WHERE a.title IN ('Rode Biet', 'Wortelen', 'Sperziebonen', 'Courgette', 'Pompoen');
+
+
+INSERT INTO adverts (title, description, created_date, user_profile_id, view_count, save_count)
+VALUES ('Asperges',
+        'Verse, witte asperges, 5 kg, rechtstreeks van de boerderij in Limburg. Perfect voor een klassieke aspergemaaltijd.',
+        '2024-11-08', 4, 0, 0);
+
+
+INSERT INTO advert_vegetables (advert_id, vegetable_id)
+SELECT a.id, v.id
+FROM adverts a
+JOIN vegetables v ON v.name = 'Asperge'
+WHERE a.title = 'Asperges';
+
+
+INSERT INTO file_uploads (file_name, file_path, file_type, file_size, advert_id)
+VALUES ('asperges.jpeg', 'uploads/asperges.jpeg', 'image/jpeg', 30569,
+        (SELECT id FROM adverts WHERE title = 'Asperges'));
+
+INSERT INTO file_uploads (file_name, file_path, file_type, file_size, advert_id)
+VALUES ('pompoen-krat.jpg', 'uploads/pompoen-krat.jpg', 'image/jpeg', 3220000,
+        (SELECT id FROM adverts WHERE title = 'Pompoen'));
+
+INSERT INTO file_uploads (file_name, file_path, file_type, file_size, advert_id)
+VALUES ('courgette.jpg', 'uploads/courgette.jpg', 'image/jpeg', 107980,
+        (SELECT id FROM adverts WHERE title = 'Courgette'));
