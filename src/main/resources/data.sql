@@ -179,6 +179,7 @@ INSERT INTO vegetables (name, category)
 VALUES ('Okra', 'Exotische gewassen (kas)');
 INSERT INTO vegetables (name, category)
 VALUES ('Paksoi', 'Exotische gewassen (kas)');
+
 -- Sample data for advertisements in data.sql
 INSERT INTO adverts (title, description, created_date, user_profile_id, view_count, save_count)
 VALUES ('Rode Biet',
@@ -229,3 +230,64 @@ VALUES ('pompoen-krat.jpg', 'uploads/pompoen-krat.jpg', 'image/jpeg', 3220000,
 INSERT INTO file_uploads (file_name, file_path, file_type, file_size, advert_id)
 VALUES ('courgette.jpg', 'uploads/courgette.jpg', 'image/jpeg', 107980,
         (SELECT id FROM adverts WHERE title = 'Courgette'));
+
+INSERT INTO file_uploads (file_name, file_path, file_type, file_size, advert_id)
+VALUES ('carrot-harvest.jpg', 'uploads/carrot-harvest.jpg', 'image/jpeg', 107980,
+        (SELECT id FROM adverts WHERE title = 'Wortelen'));
+
+INSERT INTO file_uploads (file_name, file_path, file_type, file_size, advert_id)
+VALUES ('rode-bietjes.jpeg', 'uploads/rode-bietjes.jpeg', 'image/jpeg', 107980,
+        (SELECT id FROM adverts WHERE title = 'Rode Biet'));
+
+INSERT INTO file_uploads (file_name, file_path, file_type, file_size, advert_id)
+VALUES ('sperzie-bonen-oogst.jpeg', 'uploads/sperzie-bonen-oogst.jpeg', 'image/jpeg', 107980,
+        (SELECT id FROM adverts WHERE title = 'Sperziebonen'));
+
+INSERT INTO adverts (title, description, created_date, user_profile_id, view_count, save_count)
+VALUES
+('Tomaten', 'Heerlijke, sappige tomaten, 10 kg, vers geplukt uit de kas in Eindhoven. Perfect voor salades en sauzen.', '2024-11-08', 4, 0, 0),
+('Komkommers', 'Frisse, knapperige komkommers, 20 kg, rechtstreeks van de boerderij in Groningen. Ideaal voor een gezonde snack.', '2024-11-08', 5, 0, 0),
+('Courgettes', '25 kg verse courgettes beschikbaar in Utrecht. Perfect voor grillen, bakken of een heerlijk courgettetaart.', '2024-11-08', 5, 0, 0),
+('Spinazie', 'Verse, groene spinazie, 10 kg, handgeplukt in Nijmegen. Ideaal voor smoothies en salades.', '2024-11-08', 6, 0, 0),
+('Boerenkool', 'Knapperige boerenkool, 12 kg, vers van het veld in Zwolle. Perfect voor een stevige stamppot.', '2024-11-08', 6, 0, 0),
+('Bloemkool', 'Mooie, witte bloemkolen, 8 kg, rechtstreeks van de boerderij in Arnhem. Ideaal voor diverse gerechten.', '2024-11-08', 4, 0, 0),
+('Broccoli', 'Groene, knapperige broccoli, 10 kg, vers geplukt in Tilburg. Perfect voor een gezonde maaltijd.', '2024-11-08', 3, 0, 0),
+('Aardappelen', 'Verse aardappelen, 25 kg, rechtstreeks van het land in Leeuwarden. Ideaal voor diverse gerechten.', '2024-11-08', 2, 0, 0);
+
+INSERT INTO advert_vegetables (advert_id, vegetable_id)
+SELECT a.id, v.id
+FROM adverts a
+         JOIN vegetables v ON v.name IN ('Tomaat', 'Komkommer', 'Courgette', 'Spinazie', 'Boerenkool', 'Bloemkool', 'Broccoli', 'Aardappel')
+WHERE a.title IN ('Tomaten', 'Komkommers', 'Courgettes', 'Spinazie', 'Boerenkool', 'Bloemkool', 'Broccoli', 'Aardappelen');
+
+INSERT INTO file_uploads (file_name, file_path, file_type, file_size, advert_id)
+VALUES ('spinazie-oogst.jpg', 'uploads/spinazie-oogst.jpg', 'image/jpeg', 188490,
+        (SELECT id FROM adverts WHERE title = 'Spinazie'));
+
+INSERT INTO file_uploads (file_name, file_path, file_type, file_size, advert_id)
+VALUES ('bloemkool-oogst.jpg', 'uploads/bloemkool-oogst.jpg', 'image/jpeg', 190720,
+        (SELECT id FROM adverts WHERE title = 'Bloemkool'));
+
+INSERT INTO file_uploads (file_name, file_path, file_type, file_size, advert_id)
+VALUES ('tomaten-oogst.jpg', 'uploads/tomaten-oogst.jpg', 'image/jpeg', 114880,
+        (SELECT id FROM adverts WHERE title = 'Tomaten'));
+
+INSERT INTO file_uploads (file_name, file_path, file_type, file_size, advert_id)
+VALUES ('aardappelen-mand.jpg', 'uploads/aardappelen-mand.jpg', 'image/jpeg', 420190,
+        (SELECT id FROM adverts WHERE title = 'Aardappelen'));
+
+INSERT INTO file_uploads (file_name, file_path, file_type, file_size, advert_id)
+VALUES ('broccoli-oogst-mand.jpeg', 'uploads/broccoli-oogst-mand.jpeg', 'image/jpeg', 36920,
+        (SELECT id FROM adverts WHERE title = 'Broccoli'));
+
+INSERT INTO file_uploads (file_name, file_path, file_type, file_size, advert_id)
+VALUES ('komkommers-kweken-oogsten.jpg', 'uploads/komkommers-kweken-oogsten.jpg', 'image/jpeg', 47500,
+        (SELECT id FROM adverts WHERE title = 'Komkommers'));
+
+INSERT INTO file_uploads (file_name, file_path, file_type, file_size, advert_id)
+VALUES ('boerenkool-mand.jpg', 'uploads/boerenkool-mand.jpg', 'image/jpeg', 10270,
+        (SELECT id FROM adverts WHERE title = 'Boerenkool'));
+
+INSERT INTO file_uploads (file_name, file_path, file_type, file_size, advert_id)
+VALUES ('courgette-mand.jpg', 'uploads/courgette-mand.jpg', 'image/jpeg', 64260,
+        (SELECT id FROM adverts WHERE title = 'Courgettes'));
