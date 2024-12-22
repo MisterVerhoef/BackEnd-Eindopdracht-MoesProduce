@@ -1,5 +1,6 @@
 package novi.backend.eindopdrachtmoesproducebackend.service;
 
+import novi.backend.eindopdrachtmoesproducebackend.exceptions.AdvertNotFoundException;
 import novi.backend.eindopdrachtmoesproducebackend.models.Advert;
 import novi.backend.eindopdrachtmoesproducebackend.models.User;
 import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
@@ -7,7 +8,6 @@ import novi.backend.eindopdrachtmoesproducebackend.repositories.AdvertRepository
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UploadedFileRepository;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserProfileRepository;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,12 +62,49 @@ class AdvertServiceTest {
     @Test
     void deleteAdvert_Success() {
         //Arrange
+
         when(advertRepository.findById(1L)).thenReturn(Optional.of(advert));
+
         //Act
+
         advertService.deleteAdvert(1L, "Frank");
+
         //Assert
+
         verify(advertRepository, times(1)).findById(1L);
         verify(advertRepository, times(1)).delete(advert);
+    }
+
+    @Test
+    void deleteAdvert_AdvertNotFound() {
+
+        //Arrange
+        when(advertRepository.findById(99L)).thenReturn(Optional.empty());
+
+        //Act & Assert
+
+        assertThrows(AdvertNotFoundException.class, () ->
+                advertService.deleteAdvert(99L, "Frank"));
+
+
+        verify(advertRepository, never()).delete(any(Advert.class));
+    }
+
+    @Test
+    void deleteAdvert_UserNotAuthorized() {
+
+        //Arrange
+        when(advertRepository.findById(1L)).thenReturn(Optional.of(advert));
+
+        //Act & Assert
+
+        RuntimeException thrown = assertThrows(RuntimeException.class, () ->
+                advertService.deleteAdvert(1L, "OtherUser"));
+
+         assertTrue(thrown.getMessage().contains("User is not authorized to delete this advert"));
+        verify(advertRepository, never()).delete(any(Advert.class));
+
+
     }
 
 }
