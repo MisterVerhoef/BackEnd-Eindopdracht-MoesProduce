@@ -59,14 +59,14 @@ public class AdvertService {
         Advert advert = new Advert(title, description, userProfile, vegetables);
         Advert savedAdvert = advertRepository.save(advert);
 
-        // Rol toekennen indien nodig
+
         User user = userProfile.getUser();
         if (!user.getRoles().contains(User.Role.SELLER)) {
             user.addRole(User.Role.SELLER);
             userRepository.save(user);
         }
 
-        // Afbeeldingen opslaan
+
         for (MultipartFile image : images) {
             uploadedFileService.storeFile(image, savedAdvert);
         }
@@ -160,11 +160,11 @@ public class AdvertService {
             userProfileRepository.save(userProfile);
         }
 
-        // Verwijder gekoppelde foto's
+
         List<UploadedFile> photos = advert.getPhotos();
         uploadedFileRepository.deleteAll(photos);
 
-        // Verwijder de advertentie zelf
+
         advertRepository.delete(advert);
     }
 
