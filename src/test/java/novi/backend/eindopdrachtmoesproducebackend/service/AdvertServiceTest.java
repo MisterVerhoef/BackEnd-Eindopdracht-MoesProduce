@@ -3,10 +3,7 @@ package novi.backend.eindopdrachtmoesproducebackend.service;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.AdvertDto;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.VegetableDto;
 import novi.backend.eindopdrachtmoesproducebackend.exceptions.AdvertNotFoundException;
-import novi.backend.eindopdrachtmoesproducebackend.models.Advert;
-import novi.backend.eindopdrachtmoesproducebackend.models.User;
-import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
-import novi.backend.eindopdrachtmoesproducebackend.models.Vegetable;
+import novi.backend.eindopdrachtmoesproducebackend.models.*;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -262,6 +259,149 @@ class AdvertServiceTest {
         assertEquals(1,advert.getSaveCount());
     }
 
+@Test
+    void saveAdvert_AlreadySaved() {
+
+        //Arrange
+
+    when(advertRepository.findById(1L)).thenReturn(Optional.of(advert));
+    UserProfile up = new UserProfile();
+    up.setUser(user);
+    up.getSavedAdverts().add(advert);
+    when(userProfileRepository.findByUser_Username("Frank")).thenReturn(up);
+
+    //Act & Assert
+    assertThrows(RuntimeException.class, () ->
+            advertService.saveAdvert(1L, "Frank"));
+
+    verify(userProfileRepository, never()).save(any(UserProfile.class));
+    verify(advertRepository, never()).save(any(Advert.class));
+
 
 
 }
+
+   @Test
+    void unsaveAdvert_Success() {
+
+        //Arrange
+
+       when(advertRepository.findById(1L)).thenReturn(Optional.of(advert));
+       UserProfile up = new UserProfile();
+       up.setUser(user);
+       up.getSavedAdverts().add(advert);
+       when(userProfileRepository.findByUser_Username("Frank")).thenReturn(up);
+
+       advert.setSaveCount(5);
+
+       //Act
+       advertService.unsaveAdvert(1L, "Frank");
+
+       //Assert
+       verify(userProfileRepository).save(up);
+       verify(advertRepository).save(advert);
+       assertEquals(4,advert.getSaveCount());
+       assertFalse(up.getSavedAdverts().contains(advert));
+   }
+
+   @Test
+    void unsaveAdvert_NotSaved() {
+        //Arrange
+       when(advertRepository.findById(1L)).thenReturn(Optional.of(advert));
+       UserProfile up = new UserProfile();
+       up.setUser(user);
+       when(userProfileRepository.findByUser_Username("Frank")).thenReturn(up);
+       //Act & Assert
+       assertThrows(RuntimeException.class, () ->
+               advertService.unsaveAdvert(1L, "Frank"));
+       verify(userProfileRepository, never()).save(any(UserProfile.class));
+       verify(advertRepository, never()).save(any(Advert.class));
+   }
+
+@Test
+    void getSavedAdverts_ReturnsList() {
+
+        //Arrange
+        UserProfile up = new UserProfile();
+        up.setUser(user);
+        up.getSavedAdverts().add(advert);
+
+        when(userProfileRepository.findByUser_Username("Frank")).thenReturn(up);
+
+        //Act
+        List<AdvertDto> results = advertService.getSavedAdverts("Frank");
+
+        //Assert
+
+        assertEquals(1, results.size());
+        assertEquals("Test Advert", results.getFirst().getTitle());
+
+    }
+
+    @Test
+    void incrementViewCount_CallsRepository() {
+        //Arrange
+        doNothing().when(advertRepository).incrementViewCount(1L);
+        //Act
+        advertService.incrementViewCount(1L);
+        //Assert
+       verify(advertRepository, times(1)).incrementViewCount(1L);
+    }
+
+    @Test
+    void addImageToAdvert_Success() {
+        //Arrange
+        when(advertRepository.findById(1L)).thenReturn(Optional.of(advert));
+        when(uploadedFileRepository.save(any(UploadedFile.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        //Act
+        advertService.addImageToAdvert(1L, "Photo.jpg", "Frank");
+
+        //Assert
+        verify(uploadedFileRepository, times(1)).save(any(UploadedFile.class));
+        verify(advertRepository, times(1)).save(advert);
+        assertEquals(1, advert.getPhotos().size());
+        assertEquals("Photo.jpg", advert.getPhotos().get(0).getFileName());
+    }
+
+    @Test
+    void addImageToAdvert_NotOwner_ThrowsRuntimeException() {
+        //Arrange
+        when(advertRepository.findById(1L)).thenReturn(Optional.of(advert));
+
+        //Act & Assert
+        assertThrows(RuntimeException.class, () ->
+                advertService.addImageToAdvert(1L, "Photo.jpg", "OtherUser"));
+
+        verify(uploadedFileRepository, never()).save(any(UploadedFile.class));
+        verify(advertRepository, never()).save(any(Advert.class));
+    }
+
+    @Test
+    void checkUserAuthorization_Success() {
+        //Arrange
+        when(advertRepository.findById(1L)).thenReturn(Optional.of(advert));
+
+        Authentication mockAuth = mock(Authentication.class);
+        when(mockAuth.getName()).thenReturn("Frank");
+
+        //Act
+        advertService.checkUserAuthorization(mockAuth, 1L);
+
+        //Assert
+        verify(advertRepository).findById(1L);
+    }
+
+@Test
+    void checkUserAuthorization_NotAuth_ThrowsRuntimeException() {
+    //Arrange
+    when(advertRepository.findById(1L)).thenReturn(Optional.of(advert));
+    Authentication mockAuth = mock(Authentication.class);
+    when(mockAuth.getName()).thenReturn("NotFrank");
+    //Act & Assert
+    assertThrows(RuntimeException.class, () ->
+            advertService.checkUserAuthorization(mockAuth, 1L));
+}
+
+}
+
