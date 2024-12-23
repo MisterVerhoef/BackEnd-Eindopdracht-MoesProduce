@@ -103,6 +103,26 @@ class AdvertServiceTest {
     }
 
     @Test
+    void createAdvert_UserProfileNotFound() {
+        //Arrange
+        when(authentication.getName()).thenReturn("WrongUser");
+        when(userProfileRepository.findByUser_Username("WrongUser")).thenReturn(null);
+
+        //Act & Assert
+
+        assertThrows(RuntimeException.class, () ->
+                advertService.createAdvert(
+                        "Test Advert",
+                        "Test description",
+                        List.of(),
+                        List.of(),
+                        authentication
+                )
+        );
+        verify(advertRepository, never()).save(any(Advert.class));
+    }
+
+    @Test
     void deleteAdvert_Success() {
         //Arrange
 
@@ -149,5 +169,99 @@ class AdvertServiceTest {
 
 
     }
+
+    @Test
+    void getAllAdverts(){
+
+        //Arrange
+        Advert advert2 = new Advert();
+        advert2.setId(2L);
+        advert2.setTitle("Test Advert 2");
+        advert2.setDescription("Test description 2");
+        advert2.setUserProfile(userProfile);
+        advert2.setVegetables(new ArrayList<>());
+
+        when(advertRepository.findAll()).thenReturn(List.of(advert, advert2));
+        //Act
+        List<AdvertDto> adverts = advertService.getAllAdverts();
+
+        //Assert
+        assertEquals(2, adverts.size());
+        assertEquals("Test Advert", adverts.get(0).getTitle());
+        assertEquals("Test Advert 2", adverts.get(1).getTitle());
+    }
+
+    @Test
+    void SearchAdverts_Success() {
+
+        //Arrange
+
+        when(advertRepository.searchByTitle("Test")).thenReturn(List.of(advert));
+
+        //Act
+
+        List<AdvertDto> results = advertService.searchAdverts("Test");
+
+        //Assert
+
+        assertEquals(1, results.size());
+        assertEquals("Test Advert", results.get(0).getTitle());
+        verify(advertRepository).searchByTitle("Test");
+    }
+
+    @Test
+    void getAdvertById_Success() {
+        //Arrange
+        when(advertRepository.findById(1L)).thenReturn(Optional.of(advert));
+        //Act
+        AdvertDto result = advertService.getAdvertById(1L);
+        //Assert
+        assertNotNull(result);
+        assertEquals("Test Advert", result.getTitle());
+        verify(advertRepository).findById(1L);
+    }
+
+    @Test
+    void getAdvertById_AdvertNotFound() {
+        //Arrange
+        when(advertRepository.findById(999L)).thenReturn(Optional.empty());
+        //Act & Assert
+        assertThrows(RuntimeException.class, () ->
+                advertService.getAdvertById(999L));
+
+        verify(advertRepository, times(1)).findById(999L);
+    }
+
+    @Test
+    void getAdvertsByUsername_Success() {
+        //Arrange
+        when(advertRepository.findByUserProfile_User_Username("Frank")).thenReturn(List.of(advert));
+        //Act
+        List<AdvertDto> result = advertService.getAdvertsByUsername("Frank");
+        //Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Test Advert", result.get(0).getTitle());
+        verify(advertRepository).findByUserProfile_User_Username("Frank");
+    }
+
+    @Test
+    void saveAdvert_Success() {
+        //Arrange
+
+        when(advertRepository.findById(1L)).thenReturn(Optional.of(advert));
+        UserProfile up = new UserProfile();
+        up.setUser(user);
+       when(userProfileRepository.findByUser_Username("Frank")).thenReturn(up);
+
+       //Act
+        advertService.saveAdvert(1L, "Frank");
+        //Assert
+        verify(userProfileRepository).save(up);
+        verify(advertRepository).save(advert);
+        assertEquals(1,advert.getSaveCount());
+    }
+
+
 
 }
