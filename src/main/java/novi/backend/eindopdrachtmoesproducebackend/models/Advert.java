@@ -57,7 +57,7 @@ public class Advert {
     }
 
     public void setViewCount(int viewCount) {
-        viewCount = viewCount;
+        this.viewCount = viewCount;
     }
 
     public int getSaveCount() {
