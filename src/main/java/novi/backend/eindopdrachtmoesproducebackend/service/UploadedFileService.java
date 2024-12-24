@@ -69,8 +69,6 @@ public class UploadedFileService {
             uploadedFile.setAdvert(advert);
             uploadedFile.setUserProfile(userProfile);
 
-            uploadedFileRepository.save(uploadedFile);
-
             return uploadedFileRepository.save(uploadedFile);
         } catch (IOException ex) {
             throw new RuntimeException("Could not store file " + file.getOriginalFilename() + ". Please try again!", ex);
