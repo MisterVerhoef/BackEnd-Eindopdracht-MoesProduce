@@ -12,6 +12,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,6 +29,9 @@ class UploadedFileServiceTest {
     @Mock
     private UploadedFileRepository uploadedFileRepositoryMock;
 
+    @Mock
+    private MultipartFile multipartFileMock;
+
     private UploadedFileService uploadedFileService;
 
     private Path fileStorageLocation;
@@ -37,6 +41,14 @@ class UploadedFileServiceTest {
         MockitoAnnotations.openMocks(this);
         fileStorageLocation = Files.createTempDirectory("test-uploads");
         uploadedFileService = new UploadedFileService(uploadedFileRepositoryMock);
+    }
+
+    @Test
+    void testConstructorDirectoryCreation(){
+
+        UploadedFileService service = new UploadedFileService(uploadedFileRepositoryMock);
+
+        assertNotNull(service);
     }
 
     @Test
@@ -54,6 +66,35 @@ class UploadedFileServiceTest {
 
         assertEquals(2, result.size());
     }
+    @Test
+    void testStoreFile_WithUserProfile() throws IOException {
+        // ARRANGE
+        UserProfile userProfileMock = mock(UserProfile.class);
+        when(multipartFileMock.getOriginalFilename()).thenReturn("avatar.png");
+        when(multipartFileMock.getContentType()).thenReturn("image/png");
+        when(multipartFileMock.getSize()).thenReturn(1111L);
+        when(multipartFileMock.getInputStream()).thenReturn(InputStream.nullInputStream());
+        when(uploadedFileRepositoryMock.save(any(UploadedFile.class))).thenAnswer(invocation -> {
+            UploadedFile uf = invocation.getArgument(0);
+            uf.setId(500L);
+            return uf;
+        });
+
+        // ACT
+        UploadedFile result = uploadedFileService.storeFile(multipartFileMock, userProfileMock);
+
+        // ASSERT
+        assertEquals(500L, result.getId());
+        assertEquals("image/png", result.getFileType());
+        assertEquals(1111L, result.getFileSize());
+        assertEquals(userProfileMock, result.getUserProfile());
+
+
+        assertNull(result.getAdvert());
+
+        verify(uploadedFileRepositoryMock, times(1)).save(any(UploadedFile.class));
+    }
+
 
     @Test
     void StoreFile_ShouldSaveFileToStorage() throws IOException {
@@ -75,29 +116,25 @@ class UploadedFileServiceTest {
     @Test
     void StoreFile_ShouldThrowExceptionForInvalidFile() {
         // Arrange
-        MultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", "test_data".getBytes());
+        MultipartFile testFile = new MockMultipartFile("file", "test.txt", "text/plain", "test_data".getBytes());
 
         // Act and Assert
-        assertThrows(RuntimeException.class, () -> uploadedFileService.storeFile(file));
-
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> uploadedFileService.storeFile(testFile));
+        assertTrue(ex.getMessage().contains("Invalid file type"));
+        verify(uploadedFileRepositoryMock, never()).save(any(UploadedFile.class));
     }
 
     @Test
     void StoreFile_ShouldThrowExceptionForLargeFile() {
         // Arrange
-        MultipartFile file = new MockMultipartFile("file", "test.jpeg", "image/jpeg", new byte[10 * 1024 * 1024]);
+        MultipartFile testFile = new MockMultipartFile("file", "test.jpeg", "image/jpeg", new byte[10 * 1024 * 1024]);
 
         // Act and Assert
-        assertThrows(RuntimeException.class, () -> uploadedFileService.storeFile(file));
-    }
-
-    @Test
-    void StoreFile_ShouldThrowExceptionForInvalidFileType() {
-        // Arrange
-        MultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", "test_data".getBytes());
-
-        // Act and Assert
-        assertThrows(RuntimeException.class, () -> uploadedFileService.storeFile(file));
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> uploadedFileService.storeFile(testFile));
+        assertTrue(ex.getMessage().contains("File size exceeds"));
+        verify(uploadedFileRepositoryMock, never()).save(any(UploadedFile.class));
     }
 
 
