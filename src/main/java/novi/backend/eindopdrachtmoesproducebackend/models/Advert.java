@@ -57,6 +57,7 @@ public class Advert {
     }
 
     public void setViewCount(int viewCount) {
+
         this.viewCount = viewCount;
     }
 
