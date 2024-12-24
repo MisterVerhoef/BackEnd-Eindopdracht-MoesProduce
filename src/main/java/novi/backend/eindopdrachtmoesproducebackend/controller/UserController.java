@@ -94,9 +94,9 @@ public class UserController {
             @Valid @RequestBody UserUpdateDto userUpdateDto,
             Authentication authentication) {
 
-        // Check if the authenticated user is updating their own profile
+
         if (!authentication.getName().equals(userService.getUserById(userId).getUsername())) {
-            return ResponseEntity.status(403).build(); // Forbidden
+            return ResponseEntity.status(403).build();
         }
 
         User updatedUser = userService.updateUser(userId, userUpdateDto.getEmail(), userUpdateDto.getUsername());
