@@ -1,5 +1,6 @@
 package novi.backend.eindopdrachtmoesproducebackend.service;
 
+import novi.backend.eindopdrachtmoesproducebackend.dtos.UserResponseDto;
 import novi.backend.eindopdrachtmoesproducebackend.models.User;
 import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserRepository;
@@ -9,11 +10,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -182,59 +184,163 @@ class UserServiceTest {
 
     }
 
- @Test
+    @Test
     void getUserById_UserNotFound() {
-     // Arrange
-     Long userId = 1L;
-     when(userRepositoryMock.findById(userId)).thenReturn(Optional.empty());
+        // Arrange
+        Long userId = 1L;
+        when(userRepositoryMock.findById(userId)).thenReturn(Optional.empty());
 
-     // Act & Assert
-     RuntimeException ex = assertThrows(RuntimeException.class,
-             () -> userService.getUserById(1L));
-     assertEquals("User not found", ex.getMessage());
- }
+        // Act & Assert
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userService.getUserById(1L));
+        assertEquals("User not found", ex.getMessage());
+    }
 
- @Test
+    @Test
     void getUserByUsername_Success() {
-     // ARRANGE
-     when(userRepositoryMock.findById(1L)).thenReturn(Optional.of(testUser));
-     when(userRepositoryMock.existsByEmailIgnoreCase("new@example.com")).thenReturn(false);
-     when(userRepositoryMock.existsByUsernameIgnoreCase("NewName")).thenReturn(false);
-     when(userRepositoryMock.save(any(User.class))).thenReturn(testUser);
+        // ARRANGE
+        when(userRepositoryMock.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepositoryMock.existsByEmailIgnoreCase("new@example.com")).thenReturn(false);
+        when(userRepositoryMock.existsByUsernameIgnoreCase("NewName")).thenReturn(false);
+        when(userRepositoryMock.save(any(User.class))).thenReturn(testUser);
 
-     // ACT
-     User updated = userService.updateUser(1L, "new@example.com", "NewName");
+        // ACT
+        User updated = userService.updateUser(1L, "new@example.com", "NewName");
 
-     // ASSERT
-     assertEquals("new@example.com", updated.getEmail());
-     assertEquals("NewName", updated.getUsername());
-     verify(userRepositoryMock).save(testUser);
- }
+        // ASSERT
+        assertEquals("new@example.com", updated.getEmail());
+        assertEquals("NewName", updated.getUsername());
+        verify(userRepositoryMock).save(testUser);
+    }
 
- @Test
+    @Test
     void updateUser_FailsEmailAlreadyExists() {
-     // ARRANGE
-     when(userRepositoryMock.findById(1L)).thenReturn(Optional.of(testUser));
-     when(userRepositoryMock.existsByEmailIgnoreCase("new@example.com")).thenReturn(true);
+        // ARRANGE
+        when(userRepositoryMock.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepositoryMock.existsByEmailIgnoreCase("new@example.com")).thenReturn(true);
 
-     // ACT & ASSERT
-     RuntimeException ex = assertThrows(RuntimeException.class,
-             () -> userService.updateUser(1L, "new@example.com", "AnyName"));
-     assertTrue(ex.getMessage().contains("Email already in use"));
-     verify(userRepositoryMock, never()).save(any(User.class));
- }
+        // ACT & ASSERT
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userService.updateUser(1L, "new@example.com", "AnyName"));
+        assertTrue(ex.getMessage().contains("Email already in use"));
+        verify(userRepositoryMock, never()).save(any(User.class));
+    }
+
+    @Test
+    void updateUser_FailsUsernameAlreadyExists() {
+        // ARRANGE
+        when(userRepositoryMock.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepositoryMock.existsByUsernameIgnoreCase("NewName")).thenReturn(true);
+
+        // ACT & ASSERT
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userService.updateUser(1L, "email@somemail.com", "NewName"));
+        assertTrue(ex.getMessage().contains("Username already in use"));
+        verify(userRepositoryMock, never()).save(any(User.class));
+    }
+
+    @Test
+    void changePassword_Success() {
+        // ARRANGE
+        when(userRepositoryMock.findById(1L)).thenReturn(Optional.of(testUser));
+        when(passwordEncoderMock.matches("oldPassword", testUser.getPassword())).thenReturn(true);
+        when(passwordEncoderMock.encode("newPassword")).thenReturn("newPassword");
+
+        // ACT
+        userService.changePassword(1L, "oldPassword", "newPassword");
+
+        /// ASSERT
+        verify(userRepositoryMock).save(testUser);
+    }
 
  @Test
-    void updateUser_FailsUsernameAlreadyExists() {
-     // ARRANGE
+    void changePassword_FailsWrongCurrentPassword(){
+        //Arrange
      when(userRepositoryMock.findById(1L)).thenReturn(Optional.of(testUser));
-     when(userRepositoryMock.existsByUsernameIgnoreCase("NewName")).thenReturn(true);
+     when(passwordEncoderMock.matches("wrongPass", "encryptedPassword")).thenReturn(false);
 
-     // ACT & ASSERT
-     RuntimeException ex = assertThrows(RuntimeException.class,
-             () -> userService.updateUser(1L, "email@somemail.com", "NewName"));
-     assertTrue(ex.getMessage().contains("Username already in use"));
+     //Act & Assert
+
+     IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> userService.changePassword(1L, "wrongPass", "newPass"));
+     assertTrue(ex.getMessage().contains("Current password is incorrect"));
      verify(userRepositoryMock, never()).save(any(User.class));
  }
+
+    @Test
+    void deleteUser_Success() {
+        //Arrange
+        when(userRepositoryMock.findById(1L)).thenReturn(Optional.of(testUser));
+        doNothing().when(userRepositoryMock).delete(testUser);
+
+        //Act
+        userService.deleteUser(1L);
+
+        //Arrange
+        verify(userRepositoryMock).delete(testUser);
+
+
+    }
+
+    @Test
+    void deleteUser_FailUserNotFound() {
+        //Arrange
+        when(userRepositoryMock.findById(999L)).thenReturn(Optional.empty());
+
+        //Act & Assert
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> userService.deleteUser(999L));
+        assertTrue(ex.getMessage().contains("User not found with id: 999"));
+
+    }
+
+    @Test
+    void changeUserRole_Success() {
+        //Arrange
+        when(userRepositoryMock.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepositoryMock.save(testUser)).thenReturn(testUser);
+
+
+        //Act
+        userService.changeUserRole(1L, User.Role.ADMIN);
+
+        //Assert
+        assertTrue(testUser.getRoles().contains(User.Role.ADMIN));
+        assertEquals(1, testUser.getRoles().size());
+        verify(userRepositoryMock).save(testUser);
+
+    }
+
+    @Test
+    void promoteToSeller_Success() {
+        //Arrange
+        when(userRepositoryMock.findById(1L)).thenReturn(Optional.of(testUser));
+
+        //Act
+        userService.promoteToSeller(1L);
+
+        //Assert
+        assertTrue(testUser.getRoles().contains(User.Role.SELLER));
+        assertTrue(testUser.getRoles().contains(User.Role.USER));
+        verify(userRepositoryMock).save(testUser);
+    }
+
+    @Test
+    void getAllUsers_Success() {
+        // ARRANGE
+        User anotherUser = new User("some@example.com", "someUser", "encodedXYZ", User.Role.USER);
+        anotherUser.setId(2L);
+
+        when(userRepositoryMock.findAll()).thenReturn(List.of(testUser, anotherUser));
+
+        // ACT
+        List<UserResponseDto> result = userService.getAllUsers();
+
+        // ASSERT
+        assertEquals(2, result.size());
+        assertEquals(1L, result.get(0).getId());
+        assertEquals(2L, result.get(1).getId());
+        verify(userRepositoryMock).findAll();
+
+    }
+
 
 }
