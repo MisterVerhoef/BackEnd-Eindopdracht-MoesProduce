@@ -1,5 +1,6 @@
 package novi.backend.eindopdrachtmoesproducebackend.service;
 
+import novi.backend.eindopdrachtmoesproducebackend.dtos.UserProfileDto;
 import novi.backend.eindopdrachtmoesproducebackend.models.User;
 import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UploadedFileRepository;
@@ -13,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -56,7 +58,92 @@ class UserProfileServiceTest {
         testUser.setUserProfile(testProfile);
     }
 
+    @Test
+    void getUserProfile_Success() {
+        // Arrange
+        when(userRepositoryMock.findByUsernameIgnoreCase(testUser.getUsername())).thenReturn(java.util.Optional.of(testUser));
+
+        // Act
+        UserProfileDto result = userProfileService.getUserProfile(testUser.getUsername());
+
+        //Assert
+        assertNotNull(result);
+        assertEquals(testProfile.getName(), result.getName());
+        assertEquals(testProfile.getUsername(), result.getUsername());
+        assertEquals("test@example.com", result.getEmail());
+        verify(userRepositoryMock).findByUsernameIgnoreCase("TestUser");
+    }
+
+    @Test
+    void getUserProfile_FailsUserNotFound() {
+        // ARRANGE
+        when(userRepositoryMock.findByUsernameIgnoreCase("Unknown"))
+                .thenReturn(Optional.empty());
+
+        // ACT & ASSERT
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userProfileService.getUserProfile("Unknown"));
+        assertTrue(ex.getMessage().contains("User not found"));
+    }
+
+    @Test
+    void getUserProfile_FailsProfileNull() {
+        // ARRANGE
+        testUser.setUserProfile(null);
+        when(userRepositoryMock.findByUsernameIgnoreCase("TestUser"))
+                .thenReturn(Optional.of(testUser));
+
+        // ACT & ASSERT
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userProfileService.getUserProfile("TestUser"));
+        assertTrue(ex.getMessage().contains("Profile not found"));
+    }
+
+    @Test
+    void saveUserProfile_Success() {
+        // Arrange
+        UserProfile newProfile = new UserProfile();
+        newProfile.setName("testProfile");
+        doReturn(newProfile).when(userProfileRepositoryMock).save(newProfile);
+
+        //Act
+        userProfileService.saveUserProfile(newProfile);
+
+        //Assert
+        verify(userProfileRepositoryMock).save(newProfile);
+    }
+
+    @Test
+    void updateUserProfile_Success() {
+        // ARRANGE
+        when(userRepositoryMock.findByUsernameIgnoreCase("TestUser"))
+                .thenReturn(Optional.of(testUser));
+        when(userProfileRepositoryMock.save(any(UserProfile.class))).thenReturn(testProfile);
+        when(userRepositoryMock.save(any(User.class))).thenReturn(testUser);
+
+        UserProfileDto dto = new UserProfileDto();
+        dto.setUsername("NewUsername");
+        dto.setEmail("new@example.com");
+        dto.setName("NewName");
+        dto.setDoB(LocalDate.of(1999, 12, 12));
+        dto.setAddress("NewAddress");
 
 
+        when(userRepositoryMock.existsByUsernameIgnoreCase("NewUsername")).thenReturn(false);
+        when(userRepositoryMock.existsByEmailIgnoreCase("new@example.com")).thenReturn(false);
+
+        // ACT
+
+        UserProfileDto result = userProfileService.updateUserProfile("TestUser", dto);
+
+        // ASSERT
+        assertNotNull(result);
+        assertEquals("NewName", result.getName());
+        assertEquals("NewUsername", result.getUsername());
+        assertEquals("new@example.com", result.getEmail());
+        verify(userRepositoryMock).save(testUser);
+        verify(userProfileRepositoryMock).save(testProfile);
+
+    }
 
 }
