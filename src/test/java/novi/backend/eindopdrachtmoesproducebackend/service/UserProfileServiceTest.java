@@ -1,6 +1,7 @@
 package novi.backend.eindopdrachtmoesproducebackend.service;
 
 import novi.backend.eindopdrachtmoesproducebackend.dtos.UserProfileDto;
+import novi.backend.eindopdrachtmoesproducebackend.models.UploadedFile;
 import novi.backend.eindopdrachtmoesproducebackend.models.User;
 import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UploadedFileRepository;
@@ -114,6 +115,16 @@ class UserProfileServiceTest {
     }
 
     @Test
+    void saveUserProfile_WhenSaveFails_ShouldThrowException() {
+        // ARRANGE
+        UserProfile profile = new UserProfile();
+        doThrow(new RuntimeException("Database error")).when(userProfileRepositoryMock).save(profile);
+
+        // ACT & ASSERT
+        assertThrows(RuntimeException.class, () -> userProfileService.saveUserProfile(profile));
+    }
+
+    @Test
     void updateUserProfile_Success() {
         // ARRANGE
         when(userRepositoryMock.findByUsernameIgnoreCase("TestUser"))
@@ -193,6 +204,169 @@ class UserProfileServiceTest {
         assertTrue(ex.getMessage().contains("Email already taken"));
     }
 
+    @Test
+    void getUserProfileEntity_Success() {
+        // ARRANGE
+        when(userRepositoryMock.findByUsernameIgnoreCase("TestUser"))
+                .thenReturn(Optional.of(testUser));
+
+        // ACT
+        UserProfile result = userProfileService.getUserProfileEntity("TestUser");
+
+        // ASSERT
+        assertNotNull(result);
+        assertEquals(10L, result.getId());
+        verify(userRepositoryMock).findByUsernameIgnoreCase("TestUser");
+    }
+
+    @Test
+    void getUserProfileEntity_FailsNoUser() {
+        // ARRANGE
+        when(userRepositoryMock.findByUsernameIgnoreCase("NoUser"))
+                .thenReturn(Optional.empty());
+
+        // ACT & ASSERT
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userProfileService.getUserProfileEntity("NoUser"));
+        assertTrue(ex.getMessage().contains("User not found"));
+    }
+
+    @Test
+    void getUserProfileEntity_FailsNoProfile() {
+        // ARRANGE
+        testUser.setUserProfile(null);
+        when(userRepositoryMock.findByUsernameIgnoreCase("TestUser"))
+                .thenReturn(Optional.of(testUser));
+
+        // ACT & ASSERT
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userProfileService.getUserProfileEntity("TestUser"));
+        assertTrue(ex.getMessage().contains("Profile not found"));
+    }
+
+    @Test
+    void updateProfileImage_Success() {
+        // ARRANGE
+        when(userRepositoryMock.findByUsernameIgnoreCase("TestUser"))
+                .thenReturn(Optional.of(testUser));
+
+        when(uploadedFileRepositoryMock.save(any(UploadedFile.class))).thenAnswer(invocation -> {
+            UploadedFile uf = invocation.getArgument(0);
+            uf.setId(999L);
+            return uf;
+        });
+        when(userProfileRepositoryMock.save(any(UserProfile.class)))
+                .thenReturn(testProfile);
+
+        // ACT
+        userProfileService.updateProfileImage("TestUser", "testPic.png");
+
+        // ASSERT
+
+        UploadedFile img = testProfile.getProfileImage();
+        assertNotNull(img);
+        assertEquals("testPic.png", img.getFileName());
+        assertEquals(999L, img.getId());
+        assertEquals(testProfile, img.getUserProfile());
+
+        verify(userRepositoryMock).findByUsernameIgnoreCase("TestUser");
+        verify(uploadedFileRepositoryMock).save(img);
+        verify(userProfileRepositoryMock).save(testProfile);
+    }
+
+    @Test
+    void updateProfileImage_FailsWhenNoUser() {
+        // ARRANGE
+        when(userRepositoryMock.findByUsernameIgnoreCase("Unknown"))
+                .thenReturn(Optional.empty());
+
+        // ACT & ASSERT
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userProfileService.updateProfileImage("Unknown", "testPic.png"));
+        assertTrue(ex.getMessage().contains("User not found"));
+        verify(uploadedFileRepositoryMock, never()).save(any());
+        verify(userProfileRepositoryMock, never()).save(any());
+    }
+
+
+    @Test
+    void assignImageToUserProfile_Success() {
+        // ARRANGE
+        when(userProfileRepositoryMock.findById(10L)).thenReturn(Optional.of(testProfile));
+        when(uploadedFileRepositoryMock.save(any(UploadedFile.class))).thenAnswer(invocation -> {
+            UploadedFile uf = invocation.getArgument(0);
+            uf.setId(888L);
+            return uf;
+        });
+
+        // ACT
+        userProfileService.assignImageToUserProfile(10L, "assigned.png");
+
+        // ASSERT
+        assertNotNull(testProfile.getProfileImage());
+        assertEquals("assigned.png", testProfile.getProfileImage().getFileName());
+        assertEquals(888L, testProfile.getProfileImage().getId());
+        verify(userProfileRepositoryMock).findById(10L);
+        verify(uploadedFileRepositoryMock).save(any(UploadedFile.class));
+        verify(userProfileRepositoryMock).save(testProfile);
+    }
+
+    @Test
+    void assignImageToUserProfile_FailsNotFound() {
+        // ARRANGE
+        when(userProfileRepositoryMock.findById(999L)).thenReturn(Optional.empty());
+
+        // ACT & ASSERT
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userProfileService.assignImageToUserProfile(999L, "file.png"));
+        assertTrue(ex.getMessage().contains("UserProfile not found"));
+        verify(uploadedFileRepositoryMock, never()).save(any());
+        verify(userProfileRepositoryMock, never()).save(any());
+    }
+
+    @Test
+    void convertDtoToUserProfile_AllFieldsNull_ShouldCreateEmptyProfile() {
+        // Arrange
+        UserProfileDto dto = new UserProfileDto(null, null, null, null, null);
+
+        // Act
+        UserProfile profile = userProfileService.convertDtoToUserProfile(dto);
+
+        // Assert
+        assertNotNull(profile);
+        assertNull(profile.getName());
+        assertNull(profile.getDoB());
+        assertNull(profile.getAddress());
+    }
+
+    @Test
+    void convertDtoToUserProfile_PartialFields_ShouldCreateProfile() {
+        // Arrange
+        UserProfileDto dto = new UserProfileDto("TestName", LocalDate.now(), null, null, null);
+
+        // Act
+        UserProfile profile = userProfileService.convertDtoToUserProfile(dto);
+
+        // Assert
+        assertNotNull(profile);
+        assertEquals("TestName", profile.getName());
+        assertEquals(LocalDate.now(), profile.getDoB());
+        assertNull(profile.getAddress());
+    }
+
+
+    @Test
+    void getUserProfile_WithoutProfileImage_ShouldNotIncludeImageUrl() {
+        // Arrange
+        testProfile.setProfileImage(null);
+        when(userRepositoryMock.findByUsernameIgnoreCase("TestUser")).thenReturn(Optional.of(testUser));
+
+        // Act
+        UserProfileDto result = userProfileService.getUserProfile("TestUser");
+
+        // Assert
+        assertNull(result.getProfileImageUrl());
+    }
 
 
 }
