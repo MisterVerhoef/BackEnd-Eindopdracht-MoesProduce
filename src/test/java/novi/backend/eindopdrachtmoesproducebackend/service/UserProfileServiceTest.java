@@ -146,4 +146,53 @@ class UserProfileServiceTest {
 
     }
 
+    @Test
+    void updateUserProfile_FailsUserNotFound() {
+        // ARRANGE
+        when(userRepositoryMock.findByUsernameIgnoreCase("NonExistent"))
+                .thenReturn(Optional.empty());
+
+        UserProfileDto dto = new UserProfileDto();
+        dto.setName("any");
+
+        // ACT & ASSERT
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userProfileService.updateUserProfile("NonExistent", dto));
+        assertTrue(ex.getMessage().contains("User not found"));
+    }
+
+    @Test
+    void updateUserProfile_FailsUsernameExists() {
+        // ARRANGE
+        when(userRepositoryMock.findByUsernameIgnoreCase("TestUser"))
+                .thenReturn(Optional.of(testUser));
+
+        UserProfileDto dto = new UserProfileDto();
+        dto.setUsername("ExistingName");  // conflict
+        when(userRepositoryMock.existsByUsernameIgnoreCase("ExistingName")).thenReturn(true);
+
+        // ACT & ASSERT
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userProfileService.updateUserProfile("TestUser", dto));
+        assertTrue(ex.getMessage().contains("Username already taken"));
+    }
+
+    @Test
+    void updateUserProfile_FailsEmailExists() {
+        // ARRANGE
+        when(userRepositoryMock.findByUsernameIgnoreCase("TestUser"))
+                .thenReturn(Optional.of(testUser));
+
+        UserProfileDto dto = new UserProfileDto();
+        dto.setEmail("exist@example.com");
+        when(userRepositoryMock.existsByEmailIgnoreCase("exist@example.com")).thenReturn(true);
+
+        // ACT & ASSERT
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userProfileService.updateUserProfile("TestUser", dto));
+        assertTrue(ex.getMessage().contains("Email already taken"));
+    }
+
+
+
 }
