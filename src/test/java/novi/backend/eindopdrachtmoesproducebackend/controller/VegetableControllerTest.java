@@ -128,7 +128,7 @@ class VegetableControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/vegetables - without user authentication should return 403")
+    @DisplayName("POST /api/vegetables - without user authentication should return 401")
     void addVegetable_NoUser_ShouldFailWith403() throws Exception {
         // ARRANGE
         VegetableDto inputDto = new VegetableDto("Groente", "Komkommer");
@@ -139,7 +139,7 @@ class VegetableControllerTest {
                         .with(csrf()) // Wel CSRF, maar geen ingelogde user
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized()); // Changed to expect 401 Unauthorized
 
         verify(vegetableService, never()).saveVegetable(any(Vegetable.class));
     }
