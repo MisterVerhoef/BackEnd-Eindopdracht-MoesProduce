@@ -3,7 +3,7 @@ package novi.backend.eindopdrachtmoesproducebackend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.VegetableDto;
 import novi.backend.eindopdrachtmoesproducebackend.models.Vegetable;
-import novi.backend.eindopdrachtmoesproducebackend.securtiy.JwtUtil;
+import novi.backend.eindopdrachtmoesproducebackend.security.JwtUtil;
 import novi.backend.eindopdrachtmoesproducebackend.service.VegetableService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

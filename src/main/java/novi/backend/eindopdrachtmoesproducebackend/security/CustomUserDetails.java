@@ -1,4 +1,4 @@
-package novi.backend.eindopdrachtmoesproducebackend.securtiy;
+package novi.backend.eindopdrachtmoesproducebackend.security;
 
 import novi.backend.eindopdrachtmoesproducebackend.models.User;
 import org.springframework.security.core.GrantedAuthority;

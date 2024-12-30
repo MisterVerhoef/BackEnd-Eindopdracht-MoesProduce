@@ -5,7 +5,7 @@ import novi.backend.eindopdrachtmoesproducebackend.dtos.AdvertDto;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.VegetableDto;
 import novi.backend.eindopdrachtmoesproducebackend.models.UploadedFile;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserProfileRepository;
-import novi.backend.eindopdrachtmoesproducebackend.securtiy.JwtUtil;
+import novi.backend.eindopdrachtmoesproducebackend.security.JwtUtil;
 import novi.backend.eindopdrachtmoesproducebackend.service.AdvertService;
 import novi.backend.eindopdrachtmoesproducebackend.service.UploadedFileService;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,12 +17,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -30,8 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
@@ -82,7 +77,7 @@ class AdvertControllerTest {
     @DisplayName("GET /api/adverts - should return a list of AdvertDto")
     void getAllAdverts_ShouldReturnList() throws Exception {
         // ARRANGE
-        // We gebruiken de no-args constructor + setters:
+
         AdvertDto ad1 = new AdvertDto();
         ad1.setId(1L);
         ad1.setTitle("Title1");

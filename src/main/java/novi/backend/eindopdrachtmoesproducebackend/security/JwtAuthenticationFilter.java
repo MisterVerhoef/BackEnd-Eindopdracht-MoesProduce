@@ -1,4 +1,4 @@
-package novi.backend.eindopdrachtmoesproducebackend.securtiy;
+package novi.backend.eindopdrachtmoesproducebackend.security;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
