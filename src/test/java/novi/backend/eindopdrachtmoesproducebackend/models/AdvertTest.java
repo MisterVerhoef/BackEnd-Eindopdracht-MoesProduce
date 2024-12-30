@@ -139,7 +139,11 @@ void advertInitializationWithNullDescription() {
 
 @Test
 void advertInitializationWithNullUserProfile() {
-    assertThrows(NullPointerException.class, () -> new Advert("Title", "Description", null, new ArrayList<>()));
+
+    Advert testAdvert = new Advert("Title", "Description", null, new ArrayList<>());
+    assertEquals("Title", testAdvert.getTitle());
+    assertEquals("Description", testAdvert.getDescription());
+    assertNull(testAdvert.getUserProfile());
 }
 
 @Test

@@ -83,7 +83,7 @@ class AdvertServiceTest {
         when(vegetableRepository.findByName("Bloemkool")).thenReturn(Optional.of(vegetable));
         when(advertRepository.save(any(Advert.class))).thenReturn(advert);
 
-        List<VegetableDto> vegetableDtos = List.of(new VegetableDto("Koolsoorten", "Bloemkool"));
+        List<VegetableDto> vegetableDtos = List.of(new VegetableDto("Bloemkool", "Koolsoorten"));
         //Act
         AdvertDto result = advertService.createAdvert(
                 "Test Advert",

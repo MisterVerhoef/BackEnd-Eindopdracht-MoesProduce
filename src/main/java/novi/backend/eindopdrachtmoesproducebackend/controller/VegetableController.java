@@ -32,7 +32,7 @@ public class VegetableController {
         return convertToDto(savedVegetable);
     }
 
-    // DTO conversion methods
+
     private VegetableDto convertToDto(Vegetable vegetable) {
         return new VegetableDto(vegetable.getName(), vegetable.getCategory());
     }

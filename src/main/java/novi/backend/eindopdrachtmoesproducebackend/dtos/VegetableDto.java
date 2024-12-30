@@ -6,13 +6,11 @@ public class VegetableDto {
     private String category;
 
 
-    // Constructor
-    public VegetableDto(String category, String name) {
-        this.category = category;
+    public VegetableDto(String name, String category) {
         this.name = name;
+        this.category = category;
     }
 
-    // Getters and Setters
     public String getCategory() {
         return category;
     }

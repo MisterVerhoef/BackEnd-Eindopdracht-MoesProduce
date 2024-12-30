@@ -3,8 +3,8 @@ package novi.backend.eindopdrachtmoesproducebackend.service;
 
 import novi.backend.eindopdrachtmoesproducebackend.dtos.LoginResponseDto;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserRepository;
-import novi.backend.eindopdrachtmoesproducebackend.securtiy.CustomUserDetails;
-import novi.backend.eindopdrachtmoesproducebackend.securtiy.JwtUtil;
+import novi.backend.eindopdrachtmoesproducebackend.security.CustomUserDetails;
+import novi.backend.eindopdrachtmoesproducebackend.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

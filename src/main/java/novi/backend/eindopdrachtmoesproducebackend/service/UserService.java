@@ -2,22 +2,19 @@ package novi.backend.eindopdrachtmoesproducebackend.service;
 
 
 import jakarta.transaction.Transactional;
-import novi.backend.eindopdrachtmoesproducebackend.dtos.UserDto;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.UserResponseDto;
 import novi.backend.eindopdrachtmoesproducebackend.models.User;
 import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserRepository;
-import novi.backend.eindopdrachtmoesproducebackend.securtiy.CustomUserDetails;
-import novi.backend.eindopdrachtmoesproducebackend.securtiy.JwtUtil;
+import novi.backend.eindopdrachtmoesproducebackend.security.CustomUserDetails;
+import novi.backend.eindopdrachtmoesproducebackend.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 
