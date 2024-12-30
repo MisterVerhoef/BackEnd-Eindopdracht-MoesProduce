@@ -32,8 +32,9 @@ public class UserProfileController {
 
 
     @Autowired
-    public UserProfileController(UserProfileService userProfileService) {
+    public UserProfileController(UserProfileService userProfileService, UploadedFileService uploadedFileService) {
         this.userProfileService = userProfileService;
+        this.uploadedFileService = uploadedFileService;
     }
 
     @GetMapping

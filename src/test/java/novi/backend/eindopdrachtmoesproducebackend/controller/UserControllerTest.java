@@ -5,26 +5,37 @@ import novi.backend.eindopdrachtmoesproducebackend.dtos.*;
 import novi.backend.eindopdrachtmoesproducebackend.models.User;
 import novi.backend.eindopdrachtmoesproducebackend.models.UserProfile;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.UserProfileRepository;
+import novi.backend.eindopdrachtmoesproducebackend.security.CustomUserDetails;
 import novi.backend.eindopdrachtmoesproducebackend.security.JwtUtil;
+
 import novi.backend.eindopdrachtmoesproducebackend.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
 
 import java.util.Set;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+
+import static org.mockito.Mockito.*;
+
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
@@ -35,6 +46,9 @@ class UserControllerTest {
     @MockBean
     private JwtUtil jwtUtil;
 
+    @MockBean
+    private UserDetailsService userDetailsService;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -43,9 +57,6 @@ class UserControllerTest {
 
     @MockBean
     private UserProfileRepository userProfileRepository;
-
-    @MockBean
-    private Authentication authentication;
 
     private User testUser;
 
@@ -61,109 +72,116 @@ class UserControllerTest {
         UserProfile profile = new UserProfile();
         profile.setName("TestProfile");
         testUser.setUserProfile(profile);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     @Test
     @WithMockUser
     void registerUser_ShouldReturnUserResponseDto() throws Exception {
-        // Arrange
         UserRegistrationDto dto = new UserRegistrationDto("test@example.com", "newUser", "password", true);
-        UserResponseDto responseDto = new UserResponseDto(1L, "test@example.com", "newUser", Set.of(User.Role.USER), true);
         when(userService.registerUser(anyString(), anyString(), anyString(), anyBoolean())).thenReturn(testUser);
 
-        // Act & Assert
         mockMvc.perform(MockMvcRequestBuilders.post("/api/users/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto))
-                        .with(csrf())) // Voeg de CSRF token toe met .with(csrf())
-                .andExpect(MockMvcResultMatchers.status().isOk());
-        verify(userService).registerUser("test@example.com", "newUser", "password", true);
-    }
-
-    @Test
-    @WithMockUser
-    void loginUser_ShouldReturnLoginResponseDto() throws Exception {
-        // Arrange
-        LoginRequestDto dto = new LoginRequestDto("testUser", "password");
-        LoginResponseDto responseDto = new LoginResponseDto("token");
-        when(userService.loginUser("testUser", "password")).thenReturn("token");
-
-        // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/users/login")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(MockMvcResultMatchers.status().isOk());
-        verify(userService).loginUser("testUser", "password");
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("test@example.com"))
+                .andExpect(jsonPath("$.username").value("testUser"));
     }
 
-//    @Test
-//    @WithMockUser
-//    void changePassword_ShouldReturnSuccessMessage() throws Exception {
-//        // Arrange
-//        ChangePasswordDto dto = new ChangePasswordDto("oldPassword", "newPassword");
-//        CustomUserDetails userDetails = new CustomUserDetails(testUser);
-//        when(userService.changePassword(anyLong(), anyString(), anyString())).thenThrow(new RuntimeException("Wrong password"));
-//
-//        // Act & Assert
-//        mockMvc.perform(MockMvcRequestBuilders.put("/api/users/change-password")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(dto)))
-//                .andExpect(MockMvcResultMatchers.status().isBadRequest());
-//        verify(userService).changePassword(userDetails.getId(), "oldPassword", "newPassword");
-//    }
 
     @Test
     @WithMockUser
-    void getUserDetails_ShouldReturnUserResponseDto() throws Exception {
-        // Arrange
+    void loginUser_ShouldReturnToken() throws Exception {
+        LoginRequestDto loginDto = new LoginRequestDto("testUser", "password");
+        when(userService.loginUser(anyString(), anyString())).thenReturn("test-jwt-token");
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/users/login")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value("test-jwt-token"));
+    }
+
+    @Test
+    @WithMockUser
+    void getUserDetails_ShouldReturnUserData() throws Exception {
         when(userService.getUserById(1L)).thenReturn(testUser);
 
-        // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/1"))
-                .andExpect(MockMvcResultMatchers.status().isOk());
-        verify(userService).getUserById(1L);
+        mockMvc.perform(get("/api/users/1")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("testUser"))
+                .andExpect(jsonPath("$.email").value("test@example.com"));
     }
 
     @Test
     @WithMockUser(username = "testUser")
-    void updateUser_ShouldReturnUpdatedUserResponseDto() throws Exception {
-        // Arrange
-        UserUpdateDto dto = new UserUpdateDto("newEmail@example.com", "newUsername");
-        when(userService.getUserById(1L)).thenReturn(testUser);
-        when(userService.updateUser(1L, "newEmail@example.com", "newUsername")).thenReturn(testUser);
-        when(authentication.getName()).thenReturn("testUser");
+    void updateUser_ShouldReturnUpdatedUser() throws Exception {
+        UserUpdateDto updateDto = new UserUpdateDto("new@email.com", "newUsername");
 
-        // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/users/1")
+        when(userService.getUserById(1L)).thenReturn(testUser);
+        when(userService.updateUser(1L, "new@email.com", "newUsername")).thenReturn(testUser);
+
+        mockMvc.perform(put("/api/users/1")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(MockMvcResultMatchers.status().isOk());
-        verify(userService).updateUser(1L, "newEmail@example.com", "newUsername");
+                        .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("testUser"))
+                .andExpect(jsonPath("$.email").value("test@example.com"));
     }
+
 
     @Test
     @WithMockUser
-    void deleteUser_ShouldDeleteUser() throws Exception {
-        // Arrange
+    void deleteUser_ShouldReturnNoContent() throws Exception {
         doNothing().when(userService).deleteUser(1L);
 
-        // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/1"))
-                .andExpect(MockMvcResultMatchers.status().isOk());
-        verify(userService).deleteUser(1L);
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/1")
+                        .with(csrf()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    @WithMockUser
-    void promoteToSeller_ShouldPromoteUser() throws Exception {
-        // Arrange
+    @WithMockUser(roles = "ADMIN")
+    void promoteToSeller_ShouldReturnOk() throws Exception {
         doNothing().when(userService).promoteToSeller(1L);
 
-        // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/users/1/promote"))
-                .andExpect(MockMvcResultMatchers.status().isOk());
-        verify(userService).promoteToSeller(1L);
+        mockMvc.perform(put("/api/users/1/promote")
+                        .with(csrf()))
+                .andExpect(status().isOk());
     }
+
+    @Test
+    @WithMockUser(username = "testUser")
+    void changePassword_ShouldReturnOk() throws Exception {
+        // Arrange
+        testUser.setId(1L);
+        testUser.setUsername("testUser");
+        testUser.setPassword("encodedPassword");
+
+        ChangePasswordDto passwordDto = new ChangePasswordDto();
+        passwordDto.setCurrentPassword("oldPassword");
+        passwordDto.setNewPassword("newPassword");
+
+        CustomUserDetails userDetails = new CustomUserDetails(testUser);
+        Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        doNothing().when(userService).changePassword(eq(1L), eq("oldPassword"), eq("newPassword"));
+
+        // Act & Assert
+        mockMvc.perform(put("/api/users/change-password")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passwordDto)))
+                .andExpect(status().isOk());
+
+
+        verify(userService).changePassword(1L, "oldPassword", "newPassword");
+    }
+
+
 }
