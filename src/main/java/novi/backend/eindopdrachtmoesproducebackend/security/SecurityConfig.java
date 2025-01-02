@@ -30,10 +30,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
-            throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) {
+        try {
+            return authenticationConfiguration.getAuthenticationManager();
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to get AuthenticationManager", e);
+        }
     }
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
