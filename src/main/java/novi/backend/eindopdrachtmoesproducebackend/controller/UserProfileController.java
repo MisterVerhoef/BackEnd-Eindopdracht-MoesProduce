@@ -92,7 +92,7 @@ public class UserProfileController {
                     .path(uploadedFile.getFileName())
                     .toUriString();
 
-            // Maak de response DTO
+
             UploadedFileResponseDto responseDto = new UploadedFileResponseDto(uploadedFile.getFileName(), imageUrl);
 
             return ResponseEntity.ok(responseDto);
