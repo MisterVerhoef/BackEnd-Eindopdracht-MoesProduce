@@ -19,8 +19,6 @@ import java.util.stream.Collectors;
 @Component
 public class JwtUtil {
 
-//    @Value("${jwt.secret}")
-//    private String secret;
 
     private final JwtSecretKeyGenerator secretKeyGenerator;
 
@@ -56,10 +54,12 @@ public class JwtUtil {
     }
 
     public String extractUsername(String token) {
+
         return extractClaim(token, Claims::getSubject);
     }
 
     public Date extractExpiration(String token) {
+
         return extractClaim(token, Claims::getExpiration);
     }
 
@@ -68,9 +68,13 @@ public class JwtUtil {
         return claimsResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(secretKeyGenerator.getSecretKey()).parseClaimsJws(token).getBody();
-    }
+private Claims extractAllClaims(String token) {
+    return Jwts.parserBuilder()
+            .setSigningKey(secretKeyGenerator.getSecretKey())
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
+}
 
     private Boolean isTokenExpired(String token) {
 

@@ -136,9 +136,9 @@ public class AdvertController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAdvert(@PathVariable Long id, Authentication authentication) {
-        // Controleer of de ingelogde gebruiker gemachtigd is
+
         advertService.checkUserAuthorization(authentication, id);
-        // Verwijder de advertentie
+
         advertService.deleteAdvert(id, authentication.getName());
         return ResponseEntity.noContent().build();
     }

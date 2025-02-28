@@ -58,7 +58,7 @@ public class UploadedFileController {
 
             return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
-            e.printStackTrace(); // Add this line for debugging
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
