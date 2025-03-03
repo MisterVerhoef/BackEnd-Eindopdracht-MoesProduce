@@ -3,6 +3,7 @@ package novi.backend.eindopdrachtmoesproducebackend.dtos;
 import novi.backend.eindopdrachtmoesproducebackend.models.Vegetable;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class AdvertDto {
@@ -18,6 +19,11 @@ public class AdvertDto {
     private int saveCount;
 
 
+    private String formattedCreatedDate;
+
+
+
+
     public AdvertDto(){
 
     }
@@ -31,9 +37,16 @@ public class AdvertDto {
         this.vegetables = vegetables;
         this.viewCount = viewCount;
 
+        this.setFormattedCreatedDate();
+
     }
 
-
+    public void setFormattedCreatedDate() {
+        if (this.createdDate != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            this.formattedCreatedDate = this.createdDate.format(formatter);
+        }
+    }
 
     public List<String> getImageUrls() {
         return imageUrls;
@@ -56,6 +69,7 @@ public class AdvertDto {
 
     public void setCreatedDate(LocalDate createdDate) {
         this.createdDate = createdDate;
+        this.setFormattedCreatedDate();
     }
 
     public String getDescription() {
@@ -106,5 +120,14 @@ public class AdvertDto {
     }
 
 
+    public String getFormattedCreatedDate() {
+        return formattedCreatedDate;
 
 }
+
+
+
+
+
+}
+

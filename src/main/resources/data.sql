@@ -184,17 +184,17 @@ VALUES ('Paksoi', 'Exotische gewassen (kas)');
 INSERT INTO adverts (title, description, created_date, user_profile_id, view_count, save_count)
 VALUES ('Rode Biet',
         'Haal 20 kg van de meest verse, handgeplukte rode bieten op in het hart van Breda. Perfect voor een stevige stamppot!',
-        '2024-11-08', 1, 0, 0),
+        '02-03-2025', 1, 0, 0),
        ('Wortelen',
         'Verse, knapperige wortelen, 15 kg, rechtstreeks van het veld in Rotterdam. Ideaal voor een gezonde snack of salade.',
-        '2024-11-08', 1, 0, 0),
+        '02-03-2025', 1, 0, 0),
        ('Sperziebonen', 'Proef de zomer met 10 kg sperziebonen uit Amsterdam, knapperig en vol van smaak!',
-        '2024-11-08', 2, 0, 0),
+        '02-03-2025', 2, 0, 0),
        ('Courgette',
         '25 kg verse courgettes beschikbaar in Utrecht. Perfect voor grillen, bakken of een heerlijk courgettetaart.',
-        '2024-11-08', 2, 0, 0),
+        '02-03-2025', 2, 0, 0),
        ('Pompoen', '10 prachtige pompoenen, ideaal voor soepen of herfstdecoratie, af te halen in Den Haag.',
-        '2024-11-08', 3, 0, 0);
+        '02-03-2025', 3, 0, 0);
 
 
 
@@ -209,7 +209,7 @@ WHERE a.title IN ('Rode Biet', 'Wortelen', 'Sperziebonen', 'Courgette', 'Pompoen
 INSERT INTO adverts (title, description, created_date, user_profile_id, view_count, save_count)
 VALUES ('Asperges',
         'Verse, witte asperges, 5 kg, rechtstreeks van de boerderij in Limburg. Perfect voor een klassieke aspergemaaltijd.',
-        '2024-11-08', 4, 0, 0);
+        '02-03-2025', 4, 0, 0);
 
 
 INSERT INTO advert_vegetables (advert_id, vegetable_id)
@@ -245,14 +245,14 @@ VALUES ('sperzie-bonen-oogst.jpeg', 'uploads/sperzie-bonen-oogst.jpeg', 'image/j
 
 INSERT INTO adverts (title, description, created_date, user_profile_id, view_count, save_count)
 VALUES
-('Tomaten', 'Heerlijke, sappige tomaten, 10 kg, vers geplukt uit de kas in Eindhoven. Perfect voor salades en sauzen.', '2024-11-08', 4, 0, 0),
-('Komkommers', 'Frisse, knapperige komkommers, 20 kg, rechtstreeks van de boerderij in Groningen. Ideaal voor een gezonde snack.', '2024-11-08', 5, 0, 0),
-('Courgettes', '25 kg verse courgettes beschikbaar in Utrecht. Perfect voor grillen, bakken of een heerlijk courgettetaart.', '2024-11-08', 5, 0, 0),
-('Spinazie', 'Verse, groene spinazie, 10 kg, handgeplukt in Nijmegen. Ideaal voor smoothies en salades.', '2024-11-08', 6, 0, 0),
-('Boerenkool', 'Knapperige boerenkool, 12 kg, vers van het veld in Zwolle. Perfect voor een stevige stamppot.', '2024-11-08', 6, 0, 0),
-('Bloemkool', 'Mooie, witte bloemkolen, 8 kg, rechtstreeks van de boerderij in Arnhem. Ideaal voor diverse gerechten.', '2024-11-08', 4, 0, 0),
-('Broccoli', 'Groene, knapperige broccoli, 10 kg, vers geplukt in Tilburg. Perfect voor een gezonde maaltijd.', '2024-11-08', 3, 0, 0),
-('Aardappelen', 'Verse aardappelen, 25 kg, rechtstreeks van het land in Leeuwarden. Ideaal voor diverse gerechten.', '2024-11-08', 2, 0, 0);
+('Tomaten', 'Heerlijke, sappige tomaten, 10 kg, vers geplukt uit de kas in Eindhoven. Perfect voor salades en sauzen.', '02-03-2025', 4, 0, 0),
+('Komkommers', 'Frisse, knapperige komkommers, 20 kg, rechtstreeks van de boerderij in Groningen. Ideaal voor een gezonde snack.', '02-03-2025', 5, 0, 0),
+('Courgettes', '25 kg verse courgettes beschikbaar in Utrecht. Perfect voor grillen, bakken of een heerlijk courgettetaart.', '02-03-2025', 5, 0, 0),
+('Spinazie', 'Verse, groene spinazie, 10 kg, handgeplukt in Nijmegen. Ideaal voor smoothies en salades.', '02-03-2025', 6, 0, 0),
+('Boerenkool', 'Knapperige boerenkool, 12 kg, vers van het veld in Zwolle. Perfect voor een stevige stamppot.', '02-03-2025', 6, 0, 0),
+('Bloemkool', 'Mooie, witte bloemkolen, 8 kg, rechtstreeks van de boerderij in Arnhem. Ideaal voor diverse gerechten.', '02-03-2025', 4, 0, 0),
+('Broccoli', 'Groene, knapperige broccoli, 10 kg, vers geplukt in Tilburg. Perfect voor een gezonde maaltijd.', '02-03-2025', 3, 0, 0),
+('Aardappelen', 'Verse aardappelen, 25 kg, rechtstreeks van het land in Leeuwarden. Ideaal voor diverse gerechten.', '02-03-2025', 2, 0, 0);
 
 INSERT INTO advert_vegetables (advert_id, vegetable_id)
 SELECT a.id, v.id

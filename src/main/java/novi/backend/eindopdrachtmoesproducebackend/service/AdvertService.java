@@ -201,6 +201,7 @@ public class AdvertService {
 
         advertDto.setImageUrls(imageUrls);
         advertDto.setSaveCount(advert.getSaveCount());
+        advertDto.setFormattedCreatedDate();
 
         return advertDto;
     }
