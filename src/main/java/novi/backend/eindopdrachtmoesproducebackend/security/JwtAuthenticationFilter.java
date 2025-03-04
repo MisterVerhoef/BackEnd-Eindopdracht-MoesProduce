@@ -19,6 +19,10 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final int BEARER_PREFIX_LENGTH = BEARER_PREFIX.length();
+
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
@@ -34,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
-        final String requestTokenHeader = request.getHeader("Authorization");
+        final String requestTokenHeader = request.getHeader(AUTHORIZATION_HEADER);
         logger.info("Received Authorization header: " + requestTokenHeader);
 
         String username = null;
@@ -49,8 +53,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String extractTokenFromHeader(String requestTokenHeader) {
-        if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
-            return requestTokenHeader.substring(7);
+        if (requestTokenHeader != null && requestTokenHeader.startsWith(BEARER_PREFIX)) {
+            return requestTokenHeader.substring(BEARER_PREFIX_LENGTH);
         } else {
             logger.warn("JWT Token does not begin with Bearer String" + requestTokenHeader);
             return null;
