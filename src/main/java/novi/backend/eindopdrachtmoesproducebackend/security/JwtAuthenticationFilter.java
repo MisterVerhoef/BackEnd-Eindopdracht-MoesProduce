@@ -30,7 +30,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
     }
-
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
@@ -45,13 +44,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String jwtToken = extractTokenFromHeader(requestTokenHeader);
 
         if (jwtToken != null) {
-            username = extractUsernameFromToken(jwtToken);
+            username = extractUsernameFromToken(jwtToken, request);
         }
 
         authenticateUserIfValid(request, username, jwtToken);
         filterChain.doFilter(request, response);
     }
-
     private String extractTokenFromHeader(String requestTokenHeader) {
         if (requestTokenHeader != null && requestTokenHeader.startsWith(BEARER_PREFIX)) {
             return requestTokenHeader.substring(BEARER_PREFIX_LENGTH);
@@ -61,13 +59,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    private String extractUsernameFromToken(String jwtToken) {
+    private String extractUsernameFromToken(String jwtToken, HttpServletRequest request) {
         try {
             return jwtUtil.extractUsername(jwtToken);
         } catch (ExpiredJwtException e) {
-            logger.warn("JWT Token is expired");
+            logger.warn("JWT Token is expired", e);
+            request.setAttribute("expired", true);
+        } catch (io.jsonwebtoken.SignatureException e) {
+            logger.error("Invalid JWT signature", e);
+            request.setAttribute("invalid", "signature");
+        } catch (io.jsonwebtoken.MalformedJwtException e) {
+            logger.error("Invalid JWT token format", e);
+            request.setAttribute("invalid", "format");
+        } catch (io.jsonwebtoken.UnsupportedJwtException e) {
+            logger.error("Unsupported JWT token", e);
+            request.setAttribute("invalid", "unsupported");
         } catch (IllegalArgumentException e) {
-            logger.warn("Unable to get JWT Token");
+            logger.error("JWT claims string is empty", e);
+            request.setAttribute("invalid", "empty");
+        } catch (Exception e) {
+            logger.error("Unexpected error during JWT validation", e);
+            request.setAttribute("error", "jwt_processing");
         }
         return null;
     }
