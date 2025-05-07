@@ -3,6 +3,7 @@ package novi.backend.eindopdrachtmoesproducebackend.service;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.AdvertDto;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.VegetableDto;
 import novi.backend.eindopdrachtmoesproducebackend.exceptions.AdvertNotFoundException;
+import novi.backend.eindopdrachtmoesproducebackend.exceptions.UnauthorizedAccessException;
 import novi.backend.eindopdrachtmoesproducebackend.models.*;
 import novi.backend.eindopdrachtmoesproducebackend.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,23 +19,26 @@ import java.util.stream.Collectors;
 @Service
 public class AdvertService {
 
-    @Autowired
-    private AdvertRepository advertRepository;
+    private final AdvertRepository advertRepository;
+    private final UserProfileRepository userProfileRepository;
+    private final UserRepository userRepository;
+    private final VegetableRepository vegetableRepository;
+    private final UploadedFileRepository uploadedFileRepository;
+    private final UploadedFileService uploadedFileService;
 
-    @Autowired
-    private UserProfileRepository userProfileRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private VegetableRepository vegetableRepository;
-
-    @Autowired
-    private UploadedFileRepository uploadedFileRepository;
-
-    @Autowired
-    private UploadedFileService uploadedFileService;
+    public AdvertService(AdvertRepository advertRepository,
+                         UserProfileRepository userProfileRepository,
+                         UserRepository userRepository,
+                         VegetableRepository vegetableRepository,
+                         UploadedFileRepository uploadedFileRepository,
+                         UploadedFileService uploadedFileService) {
+        this.advertRepository = advertRepository;
+        this.userProfileRepository = userProfileRepository;
+        this.userRepository = userRepository;
+        this.vegetableRepository = vegetableRepository;
+        this.uploadedFileRepository = uploadedFileRepository;
+        this.uploadedFileService = uploadedFileService;
+    }
 
     @Transactional
     public AdvertDto createAdvert(
@@ -86,7 +90,7 @@ public class AdvertService {
 
     public Advert getAdvertEntityById(Long id) {
         return advertRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Advert not found with id: " + id));
+                .orElseThrow(() -> new AdvertNotFoundException(id));
     }
 
     public AdvertDto getAdvertById(Long id) {
@@ -103,7 +107,7 @@ public class AdvertService {
     @Transactional
     public void saveAdvert(Long advertId, String username) {
         Advert advert = advertRepository.findById(advertId)
-                .orElseThrow(() -> new RuntimeException("Advert not found with id: " + advertId));
+                .orElseThrow(() -> new AdvertNotFoundException(advertId));
         UserProfile userProfile = userProfileRepository.findByUser_Username(username);
 
         if (userProfile.getSavedAdverts().contains(advert)) {
@@ -119,7 +123,7 @@ public class AdvertService {
     @Transactional
     public void unsaveAdvert(Long advertId, String username) {
         Advert advert = advertRepository.findById(advertId)
-                .orElseThrow(() -> new RuntimeException("Advert not found with id: " + advertId));
+                .orElseThrow(() -> new AdvertNotFoundException(advertId));
         UserProfile userProfile = userProfileRepository.findByUser_Username(username);
 
         if (!userProfile.getSavedAdverts().contains(advert)) {
@@ -151,7 +155,7 @@ public class AdvertService {
 
         // Check of de gebruiker de eigenaar is
         if (!advert.getUserProfile().getUser().getUsername().equals(username)) {
-            throw new RuntimeException("User is not authorized to delete this advert");
+            throw new UnauthorizedAccessException(username, id);
         }
 
         List<UserProfile> allUsersWhoSaved = userProfileRepository.findAllBySavedAdvertsContains(advert);
@@ -173,7 +177,7 @@ public class AdvertService {
                 .orElseThrow(() -> new AdvertNotFoundException(advertId));
         UserProfile userProfile = advert.getUserProfile();
         if (!authentication.getName().equals(userProfile.getUser().getUsername())) {
-            throw new RuntimeException("User is not authorized to modify this advert");
+            throw new UnauthorizedAccessException(authentication.getName(), advertId);
         }
     }
 
@@ -209,11 +213,11 @@ public class AdvertService {
     @Transactional
     public void addImageToAdvert(Long advertId, String fileName, String username) {
         Advert advert = advertRepository.findById(advertId)
-                .orElseThrow(() -> new RuntimeException("Advert not found with id: " + advertId));
+                .orElseThrow(() -> new AdvertNotFoundException(advertId));
 
 
         if (!advert.getUserProfile().getUser().getUsername().equals(username)) {
-            throw new RuntimeException("User is not authorized to modify this advert");
+            throw new UnauthorizedAccessException(username, advertId);
         }
 
         UploadedFile uploadedFile = new UploadedFile();

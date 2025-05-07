@@ -7,12 +7,10 @@ import novi.backend.eindopdrachtmoesproducebackend.dtos.AdvertDto;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.UploadedFileResponseDto;
 import novi.backend.eindopdrachtmoesproducebackend.dtos.VegetableDto;
 import novi.backend.eindopdrachtmoesproducebackend.models.UploadedFile;
-import novi.backend.eindopdrachtmoesproducebackend.repositories.UserProfileRepository;
 import novi.backend.eindopdrachtmoesproducebackend.service.AdvertService;
 import novi.backend.eindopdrachtmoesproducebackend.service.UploadedFileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -29,17 +27,17 @@ public class AdvertController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdvertController.class);
 
-    @Autowired
-    private AdvertService advertService;
+    private final AdvertService advertService;
+    private final UploadedFileService uploadedFileService;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    private UploadedFileService uploadedFileService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private UserProfileRepository userProfileRepository;
+    public AdvertController(AdvertService advertService, 
+                           UploadedFileService uploadedFileService, 
+                           ObjectMapper objectMapper) {
+        this.advertService = advertService;
+        this.uploadedFileService = uploadedFileService;
+        this.objectMapper = objectMapper;
+    }
 
     @GetMapping
     public List<AdvertDto> getAllAdverts() {
@@ -65,22 +63,14 @@ public class AdvertController {
             @RequestParam("description") String description,
             @RequestParam("vegetables") String vegetablesJson,
             @RequestPart("images") List<MultipartFile> images,
-            Authentication authentication) {
+            Authentication authentication) throws JsonProcessingException {
 
-        try {
-            List<VegetableDto> vegetables = objectMapper.readValue(vegetablesJson, new TypeReference<>(){});
-            logger.info("Received create advert request. Title: {}, Description: {}, Vegetables count: {}, Images count: {}",
-                    title, description, vegetables.size(), images.size());
+        List<VegetableDto> vegetables = objectMapper.readValue(vegetablesJson, new TypeReference<>(){});
+        logger.info("Received create advert request. Title: {}, Description: {}, Vegetables count: {}, Images count: {}",
+                title, description, vegetables.size(), images.size());
 
-            AdvertDto createdAdvert = advertService.createAdvert(title, description, vegetables, images, authentication);
-            return ResponseEntity.ok(createdAdvert);
-        } catch (JsonProcessingException e) {
-            logger.error("Error parsing vegetables JSON", e);
-            return ResponseEntity.badRequest().body(null);
-        } catch (Exception e) {
-            logger.error("Error creating advert", e);
-            return ResponseEntity.badRequest().body(null);
-        }
+        AdvertDto createdAdvert = advertService.createAdvert(title, description, vegetables, images, authentication);
+        return ResponseEntity.ok(createdAdvert);
     }
 
     @PostMapping("/{advertId}/upload-image")
@@ -88,25 +78,19 @@ public class AdvertController {
             @PathVariable Long advertId,
             @RequestParam("file") MultipartFile file,
             Authentication authentication) {
-        try {
-            String username = authentication.getName();
+        String username = authentication.getName();
 
-            UploadedFile uploadedFile = uploadedFileService.storeFile(file);
-            advertService.addImageToAdvert(advertId, uploadedFile.getFileName(), username);
+        UploadedFile uploadedFile = uploadedFileService.storeFile(file);
+        advertService.addImageToAdvert(advertId, uploadedFile.getFileName(), username);
 
-            String imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/uploads/")
-                    .path(uploadedFile.getFileName())
-                    .toUriString();
+        String imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/uploads/")
+                .path(uploadedFile.getFileName())
+                .toUriString();
 
-            UploadedFileResponseDto responseDto = new UploadedFileResponseDto(uploadedFile.getFileName(), imageUrl);
+        UploadedFileResponseDto responseDto = new UploadedFileResponseDto(uploadedFile.getFileName(), imageUrl);
 
-            return ResponseEntity.ok(responseDto);
-
-        } catch (Exception e) {
-            logger.error("Error uploading advert image", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        return ResponseEntity.ok(responseDto);
     }
 
     @GetMapping("/user")
