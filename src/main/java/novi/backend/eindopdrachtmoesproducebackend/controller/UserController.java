@@ -92,10 +92,10 @@ public class UserController {
             Authentication authentication) {
 
 
-        if (!authentication.getName().equals(userService.getUserById(userId).getUsername())) {
-            return ResponseEntity.status(403).build();
-        }
-
+    Long authenticatedUserId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+    if (!authenticatedUserId.equals(userId)) {
+        return ResponseEntity.status(403).build();
+    }
         User updatedUser = userService.updateUser(userId, userUpdateDto.getEmail(), userUpdateDto.getUsername());
 
         UserResponseDto responseDto = new UserResponseDto(
@@ -112,8 +112,7 @@ public class UserController {
         @DeleteMapping("/{userId}")
     public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
-        System.out.println("User with userId " + userId + " deleted successfully");
-        return ResponseEntity.ok().body("user deleted successfully");
+        logger.info("User with userId {} deleted successfully", userId);        return ResponseEntity.ok().body("user deleted successfully");
     }
 
 
