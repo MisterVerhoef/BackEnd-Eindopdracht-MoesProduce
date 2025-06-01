@@ -26,10 +26,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
+    /****
+     * Constructs a JwtAuthenticationFilter with the specified JWT utility and user details service.
+     */
     public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
     }
+    /****
+     * Processes incoming HTTP requests to authenticate users based on JWT tokens.
+     *
+     * Extracts the JWT token from the Authorization header, attempts to retrieve the username, handles token-related exceptions by setting request attributes, and sets the authentication context if the token is valid. Continues the filter chain regardless of authentication outcome.
+     *
+     * @param request the incoming HTTP request
+     * @param response the HTTP response
+     * @param filterChain the filter chain to continue processing
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs during filtering
+     */
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
@@ -50,6 +64,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         authenticateUserIfValid(request, username, jwtToken);
         filterChain.doFilter(request, response);
     }
+    /**
+     * Extracts the JWT token from the Authorization header if it starts with the "Bearer " prefix.
+     *
+     * @param requestTokenHeader the value of the Authorization header from the HTTP request
+     * @return the JWT token if present and properly prefixed; otherwise, null
+     */
     private String extractTokenFromHeader(String requestTokenHeader) {
         if (requestTokenHeader != null && requestTokenHeader.startsWith(BEARER_PREFIX)) {
             return requestTokenHeader.substring(BEARER_PREFIX_LENGTH);
@@ -59,6 +79,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
+    /**
+     * Attempts to extract the username from a JWT token, setting request attributes to indicate specific token errors if extraction fails.
+     *
+     * @param jwtToken the JWT token string to extract the username from
+     * @param request the current HTTP request, used to set attributes for token error diagnostics
+     * @return the extracted username if successful; otherwise, null
+     */
     private String extractUsernameFromToken(String jwtToken, HttpServletRequest request) {
         try {
             return jwtUtil.extractUsername(jwtToken);
@@ -84,6 +111,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 
+    /****
+     * Authenticates the user for the current request if the provided JWT token is valid and no authentication is already set.
+     *
+     * Loads user details by username, validates the JWT token, and sets the authentication in the security context upon successful validation.
+     */
     private void authenticateUserIfValid(HttpServletRequest request, String username, String jwtToken) {
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
@@ -95,6 +127,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
+    /**
+     * Creates a {@link UsernamePasswordAuthenticationToken} for the given user details and HTTP request.
+     *
+     * The authentication token includes the user's authorities and attaches additional details from the request.
+     *
+     * @param userDetails the authenticated user's details
+     * @param request the current HTTP request
+     * @return a populated {@link UsernamePasswordAuthenticationToken} for use in the security context
+     */
     private UsernamePasswordAuthenticationToken createAuthenticationToken(UserDetails userDetails, HttpServletRequest request) {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities());

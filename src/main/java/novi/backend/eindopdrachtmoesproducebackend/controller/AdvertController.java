@@ -31,6 +31,13 @@ public class AdvertController {
     private final UploadedFileService uploadedFileService;
     private final ObjectMapper objectMapper;
 
+    /**
+     * Constructs an AdvertController with the required services and object mapper.
+     *
+     * @param advertService service for advert-related business logic
+     * @param uploadedFileService service for handling uploaded files
+     * @param objectMapper object mapper for JSON processing
+     */
     public AdvertController(AdvertService advertService, 
                            UploadedFileService uploadedFileService, 
                            ObjectMapper objectMapper) {
@@ -39,6 +46,11 @@ public class AdvertController {
         this.objectMapper = objectMapper;
     }
 
+    /****
+     * Retrieves all adverts.
+     *
+     * @return a list of all adverts as AdvertDto objects
+     */
     @GetMapping
     public List<AdvertDto> getAllAdverts() {
         return advertService.getAllAdverts();
@@ -57,6 +69,16 @@ public class AdvertController {
         return ResponseEntity.ok(results);
     }
 
+    /****
+     * Creates a new advert with the specified title, description, vegetables, and images for the authenticated user.
+     *
+     * @param title the title of the advert
+     * @param description the description of the advert
+     * @param vegetablesJson a JSON string representing a list of vegetables associated with the advert
+     * @param images a list of image files to be uploaded with the advert
+     * @return the created advert as an AdvertDto
+     * @throws JsonProcessingException if the vegetablesJson cannot be parsed
+     */
     @PostMapping
     public ResponseEntity<AdvertDto> createAdvert(
             @RequestParam("title") String title,
@@ -73,6 +95,13 @@ public class AdvertController {
         return ResponseEntity.ok(createdAdvert);
     }
 
+    /**
+     * Handles image upload for a specific advert and associates the uploaded image with the advert and authenticated user.
+     *
+     * @param advertId the ID of the advert to which the image will be added
+     * @param file the image file to upload
+     * @return a response containing the uploaded file's name and accessible URL
+     */
     @PostMapping("/{advertId}/upload-image")
     public ResponseEntity<UploadedFileResponseDto> uploadAdvertImage(
             @PathVariable Long advertId,
@@ -93,6 +122,12 @@ public class AdvertController {
         return ResponseEntity.ok(responseDto);
     }
 
+    /****
+     * Retrieves all adverts created by the authenticated user.
+     *
+     * @param principal the security principal representing the authenticated user
+     * @return a response containing a list of adverts belonging to the user
+     */
     @GetMapping("/user")
     public ResponseEntity<List<AdvertDto>> getAdvertsByUser(Principal principal) {
         String username = principal.getName();
