@@ -19,6 +19,13 @@ public class GlobalExceptionHandler {
     private static final String ERROR = "error";
     private static final String MESSAGE = "message";
 
+    /**
+     * Handles UnauthorizedAccessException by returning a structured 403 Forbidden error response.
+     *
+     * The response body includes the timestamp, HTTP status code, reason phrase, and the exception message.
+     *
+     * @return a ResponseEntity with a 403 status and detailed error information
+     */
     @ExceptionHandler(UnauthorizedAccessException.class)
     public ResponseEntity<Object> handleUnauthorizedAccessException(UnauthorizedAccessException ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
@@ -30,6 +37,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
+    /**
+     * Handles AdvertNotFoundException by returning a structured 404 Not Found error response.
+     *
+     * The response body includes the current timestamp, HTTP status code, reason phrase, and the exception message.
+     *
+     * @return a ResponseEntity containing error details and HTTP status 404
+     */
     @ExceptionHandler(AdvertNotFoundException.class)
     public ResponseEntity<Object> handleAdvertNotFoundException(AdvertNotFoundException ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
@@ -41,6 +55,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
+    /**
+     * Handles all uncaught exceptions and returns a structured error response with HTTP 400 Bad Request status.
+     *
+     * @return a ResponseEntity containing a map with timestamp, status code, error reason, and exception message
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
