@@ -85,6 +85,16 @@ public class UserController {
         return ResponseEntity.ok(responseDto);
     }
 
+    /**
+     * Updates the email and username of the specified user if the authenticated user matches the user ID.
+     *
+     * Returns a 403 Forbidden response if the authenticated user does not match the user being updated.
+     * On success, returns the updated user information.
+     *
+     * @param userId the ID of the user to update
+     * @param userUpdateDto the new email and username for the user
+     * @return the updated user details, or 403 Forbidden if unauthorized
+     */
     @PutMapping("/{userId}")
     public ResponseEntity<UserResponseDto> updateUser(
             @PathVariable Long userId,
@@ -92,10 +102,10 @@ public class UserController {
             Authentication authentication) {
 
 
-        if (!authentication.getName().equals(userService.getUserById(userId).getUsername())) {
-            return ResponseEntity.status(403).build();
-        }
-
+    Long authenticatedUserId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+    if (!authenticatedUserId.equals(userId)) {
+        return ResponseEntity.status(403).build();
+    }
         User updatedUser = userService.updateUser(userId, userUpdateDto.getEmail(), userUpdateDto.getUsername());
 
         UserResponseDto responseDto = new UserResponseDto(
@@ -109,11 +119,16 @@ public class UserController {
         return ResponseEntity.ok(responseDto);
     }
 
-        @DeleteMapping("/{userId}")
+        /****
+     * Deletes a user by their ID.
+     *
+     * @param userId the ID of the user to delete
+     * @return a response entity with a success message upon successful deletion
+     */
+    @DeleteMapping("/{userId}")
     public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
-        System.out.println("User with userId " + userId + " deleted successfully");
-        return ResponseEntity.ok().body("user deleted successfully");
+        logger.info("User with userId {} deleted successfully", userId);        return ResponseEntity.ok().body("user deleted successfully");
     }
 
 
